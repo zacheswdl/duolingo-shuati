@@ -56,7 +56,7 @@ export default function MistakesPage() {
 
   // 回血挑战完成页
   if (recoveryComplete && recoveryResult) {
-    const heartsRecovered = Math.floor(recoveryResult.correct / 3);
+    const heartsRecovered = recoveryResult.correct;
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] px-6">
         <motion.div
@@ -142,7 +142,7 @@ export default function MistakesPage() {
           <span className="text-xl font-bold text-rose-500">{hearts} / 5</span>
         </div>
         <p className="text-sm text-slate-400">
-          每连续答对3道错题，恢复1颗红心！
+          每答对1道错题，恢复1颗红心！
         </p>
       </div>
 

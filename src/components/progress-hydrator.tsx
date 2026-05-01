@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useUserProgress } from "@/store/use-user-progress";
 import { createClient } from "@/lib/supabase/client";
+import { resetHeartsIfNewDay } from "@/lib/supabase/actions";
 
 export const ProgressHydrator = () => {
   const { hydrate, setLoading } = useUserProgress();
@@ -18,9 +19,11 @@ export const ProgressHydrator = () => {
           return;
         }
 
+        await resetHeartsIfNewDay();
+
         const { data } = await supabase
           .from("user_progress")
-          .select("hearts, xp, streak, total_correct, chapter_correct")
+          .select("hearts, xp, streak, total_correct, chapter_correct, last_hearts_reset")
           .eq("user_id", user.id)
           .maybeSingle();
 
@@ -31,6 +34,7 @@ export const ProgressHydrator = () => {
             streak: data.streak,
             total_correct: data.total_correct ?? 0,
             chapter_correct: data.chapter_correct ?? {},
+            last_hearts_reset: data.last_hearts_reset,
           });
         } else {
           setLoading(false);

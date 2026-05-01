@@ -23,7 +23,7 @@ const iconMap: Record<string, IconName> = {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { hearts, xp, streak, totalCorrect, addXp: addXpLocal } = useUserProgress();
+  const { hearts, xp, streak, totalCorrect, addXp: addXpLocal, setXp } = useUserProgress();
   const [signingOut, setSigningOut] = useState(false);
   const [achievements, setAchievements] = useState<UserAchievement[]>([]);
   const [dailyTasks, setDailyTasks] = useState<UserDailyTask[]>([]);
@@ -69,7 +69,12 @@ export default function ProfilePage() {
       const result = await claimDailyTaskReward(taskId);
       if ((result as any)?.success) {
         const xpReward = (result as any).xpReward || DAILY_TASK_REWARD_XP;
-        addXpLocal(xpReward);
+        const newXp = (result as any).newXp;
+        if (newXp && newXp > 0) {
+          setXp(newXp);
+        } else {
+          addXpLocal(xpReward);
+        }
         setDailyTasks((prev) =>
           prev.map((task) =>
             task.id === taskId ? { ...task, claimed: true } : task

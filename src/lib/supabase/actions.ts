@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createServerSupabaseClient } from "./server";
-import { HEARTS_MAX, XP_PER_CORRECT, MISTAKE_RECOVERY_COUNT, EXAM_PASS_BONUS_XP, DAILY_TASK_REWARD_XP, DAILY_TASK_REWARD_XP_QUESTIONS, ACHIEVEMENTS, ACHIEVEMENT_XP_PER_LEVEL } from "@/lib/constants";
+import { HEARTS_MAX, XP_PER_CORRECT, EXAM_PASS_BONUS_XP, DAILY_TASK_REWARD_XP, DAILY_TASK_REWARD_XP_QUESTIONS, ACHIEVEMENTS, ACHIEVEMENT_XP_PER_LEVEL } from "@/lib/constants";
 import type { LeaderboardEntry } from "@/lib/types";
 
 // ============ 题库操作 ============
@@ -72,6 +72,7 @@ export async function getUserProgress() {
         streak: 0,
         total_correct: 0,
         chapter_correct: {},
+        last_hearts_reset: new Date().toISOString().split("T")[0],
       })
       .select()
       .single();
@@ -83,32 +84,61 @@ export async function getUserProgress() {
   return data;
 }
 
-export async function addXp(amount: number) {
+export async function refreshUserProgress(): Promise<{ xp: number; streak: number; hearts: number } | null> {
+  const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from("user_progress")
+    .select("xp, streak, hearts")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return { xp: data.xp, streak: data.streak, hearts: data.hearts };
+}
+
+export async function addXp(amount: number): Promise<{ success: boolean; newXp: number }> {
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) throw new Error("Unauthorized");
 
-  const { error } = await supabase.rpc("add_xp", {
+  const { data, error } = await supabase.rpc("add_xp", {
     p_user_id: user.id,
     p_amount: amount,
   });
 
   if (error) {
-    // fallback: 直接更新
+    console.error("add_xp rpc failed:", error.message);
     const progress = await getUserProgress();
     if (progress) {
-      await supabase
+      const currentXp = (progress as any).xp || 0;
+      const targetXp = currentXp + amount;
+      const { error: updateError } = await supabase
         .from("user_progress")
-        .update({ xp: (progress as any).xp + amount })
+        .update({ xp: targetXp })
         .eq("user_id", user.id);
+      if (updateError) {
+        console.error("add_xp fallback update failed:", updateError.message);
+        return { success: false, newXp: currentXp };
+      }
+      revalidatePath("/learn");
+      revalidatePath("/lesson");
+      revalidatePath("/profile");
+      revalidatePath("/leaderboard");
+      return { success: true, newXp: targetXp };
     }
+    return { success: false, newXp: 0 };
   }
 
   revalidatePath("/learn");
   revalidatePath("/lesson");
   revalidatePath("/profile");
   revalidatePath("/leaderboard");
+  return { success: true, newXp: data ?? 0 };
 }
 
 export async function removeHeart() {
@@ -164,6 +194,45 @@ export async function addHeart() {
   revalidatePath("/learn");
   revalidatePath("/mistakes");
   return { success: true };
+}
+
+export async function resetHeartsIfNewDay() {
+  const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) return null;
+
+  const { data: progress, error } = await supabase
+    .from("user_progress")
+    .select("*")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!progress) return null;
+
+  const today = new Date().toISOString().split("T")[0];
+  const lastReset = (progress as any).last_hearts_reset;
+
+  if (!lastReset || lastReset < today) {
+    const { data: updated, error: updateError } = await supabase
+      .from("user_progress")
+      .update({
+        hearts: HEARTS_MAX,
+        last_hearts_reset: today,
+      })
+      .eq("user_id", user.id)
+      .select()
+      .single();
+
+    if (updateError) throw new Error(updateError.message);
+
+    revalidatePath("/learn");
+    revalidatePath("/lesson");
+    return updated;
+  }
+
+  return progress;
 }
 
 export async function updateStreak() {
@@ -477,17 +546,15 @@ export async function getMistakeRecoveryProgress() {
 
   if (!user) return { consecutiveCorrect: 0, heartsRecovered: 0 };
 
-  // 获取最近的对错题记录（只算错题重做）
   const { data } = await supabase
     .from("user_actions")
     .select("*")
     .eq("user_id", user.id)
     .eq("is_mistake", false)
-    .order("created_at", { ascending: false })
-    .limit(MISTAKE_RECOVERY_COUNT);
+    .order("created_at", { ascending: false });
 
   const consecutiveCorrect = data?.length || 0;
-  const heartsRecovered = Math.floor(consecutiveCorrect / MISTAKE_RECOVERY_COUNT);
+  const heartsRecovered = consecutiveCorrect;
 
   return { consecutiveCorrect, heartsRecovered };
 }
@@ -792,9 +859,9 @@ export async function claimDailyTaskReward(taskId: number) {
 
   // 发放奖励（刷题20道任务奖励50经验值，其他任务奖励100经验值）
   const rewardXp = (task as any).task_type === "answer_20_questions" ? DAILY_TASK_REWARD_XP_QUESTIONS : DAILY_TASK_REWARD_XP;
-  await addXp(rewardXp);
+  const xpResult = await addXp(rewardXp);
 
   revalidatePath("/learn");
   revalidatePath("/profile");
-  return { success: true, xpReward: rewardXp };
+  return { success: true, xpReward: rewardXp, newXp: xpResult.newXp };
 }

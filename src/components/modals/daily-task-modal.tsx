@@ -12,7 +12,7 @@ type Props = {
   open: boolean;
   completedTasks: UserDailyTask[];
   onClose: () => void;
-  onClaimed: () => void;
+  onClaimed: (newXp?: number) => void;
 };
 
 export const DailyTaskModal = ({ open, completedTasks, onClose, onClaimed }: Props) => {
@@ -22,7 +22,7 @@ export const DailyTaskModal = ({ open, completedTasks, onClose, onClaimed }: Pro
     setClaimingId(taskId);
     const result = await claimDailyTaskReward(taskId);
     if (result.success) {
-      onClaimed();
+      onClaimed((result as any).newXp);
     }
     setClaimingId(null);
   };

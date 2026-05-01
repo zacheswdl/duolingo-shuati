@@ -15,7 +15,7 @@ import type { Question, UserDailyTask } from "@/lib/types";
 
 export default function ExamPage() {
   const router = useRouter();
-  const { addXp: addXpLocal, xp } = useUserProgress();
+  const { addXp: addXpLocal, xp, setXp } = useUserProgress();
   const [started, setStarted] = useState(false);
   const [examQuestions, setExamQuestions] = useState<Question[]>([]);
   const [examComplete, setExamComplete] = useState(false);
@@ -51,9 +51,11 @@ export default function ExamPage() {
 
     // 考试及格奖励
     if (passed) {
-      // 加大量经验值
-      await addXp(EXAM_PASS_BONUS_XP);
+      const xpResult = await addXp(EXAM_PASS_BONUS_XP);
       addXpLocal(EXAM_PASS_BONUS_XP);
+      if (xpResult?.success && xpResult.newXp > 0) {
+        setXp(xpResult.newXp);
+      }
 
       // 更新连续打卡
       await updateStreak();
@@ -102,8 +104,12 @@ export default function ExamPage() {
           open={showDailyTaskModal}
           completedTasks={completedDailyTasks}
           onClose={() => setShowDailyTaskModal(false)}
-          onClaimed={() => {
-            addXpLocal(100);
+          onClaimed={(newXp) => {
+            if (newXp && newXp > 0) {
+              setXp(newXp);
+            } else {
+              addXpLocal(100);
+            }
           }}
         />
       </>

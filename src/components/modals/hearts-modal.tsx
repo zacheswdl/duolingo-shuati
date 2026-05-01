@@ -30,8 +30,8 @@ export const HeartsModal = () => {
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={close}>
-      <DialogContent className="max-w-md rounded-2xl">
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) return; }}>
+      <DialogContent className="max-w-md rounded-2xl" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <div className="flex items-center w-full justify-center mb-4">
             <Icon name="frown" size={80} />
@@ -42,7 +42,9 @@ export const HeartsModal = () => {
           <DialogDescription className="text-center text-base text-slate-500">
             快去错题本复习恢复红心吧！
             <br />
-            每连续答对3道错题可恢复1颗❤️
+            每答对1道错题可恢复1颗❤️
+            <br />
+            红心每天0点自动恢复满
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-y-3 mt-4">
@@ -54,14 +56,7 @@ export const HeartsModal = () => {
           >
             去错题本恢复红心
           </Button>
-          <Button
-            variant="ghost"
-            size="lg"
-            className="w-full text-slate-400"
-            onClick={close}
-          >
-            稍后再说
-          </Button>
+
         </div>
       </DialogContent>
     </Dialog>

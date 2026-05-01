@@ -244,7 +244,41 @@ npm run dev
 
 ## 🚢 部署指南
 
-### 腾讯云 EdgeOne 部署
+### 腾讯云 EdgeOne Pages 部署（推荐）
+
+EdgeOne Pages 是腾讯云推出的边缘全栈部署平台，支持 Next.js SSR 全栈部署，无需自建服务器。
+
+1. **推送代码到 GitHub**
+
+```bash
+git push origin main
+```
+
+2. **创建 EdgeOne 站点**
+   - 登录 [腾讯云 EdgeOne 控制台](https://console.cloud.tencent.com/edgeone)
+   - 点击「新建站点」，输入你的域名（如 `your-domain.com`）
+   - 选择 NS 接入方式
+   - 将域名的 NS 记录修改为 EdgeOne 分配的名称服务器
+
+3. **导入 GitHub 仓库到 EdgeOne Pages**
+   - 进入 [EdgeOne Pages 控制台](https://edgeone.cloud.tencent.com/pages)
+   - 点击「创建项目」→「导入 Git 仓库」
+   - 授权 GitHub 并选择你的仓库
+   - 框架预设选择 **Next.js**（自动检测）
+   - 构建命令：`npm run build`
+   - 输出目录：`.next`
+   - 添加环境变量：`NEXT_PUBLIC_SUPABASE_URL` 和 `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - 点击「部署」
+
+4. **绑定自定义域名**
+   - 部署成功后，在「项目设置」→「自定义域名」中添加子域名（如 `tk.your-domain.com`）
+   - 按提示添加 CNAME 记录指向 EdgeOne 分配的地址
+   - 等待 SSL 证书自动签发
+
+5. **验证访问**
+   - 通过自定义域名访问应用，确认功能正常
+
+### 自建服务器部署
 
 1. **构建项目**
 
@@ -252,37 +286,29 @@ npm run dev
 npm run build
 ```
 
-2. **在 EdgeOne 控制台创建站点**
-   - 登录 [腾讯云 EdgeOne 控制台](https://console.cloud.tencent.com/edgeone)
-   - 点击「新建站点」，输入你的域名
-   - 选择接入方式（NS 接入或 CNAME 接入）
+2. **启动服务**
 
-3. **配置源站**
-   - 源站地址填写你的服务器 IP 或域名
-   - 端口填写 Next.js 服务端口（默认 3000）
-   - 开启 HTTPS（EdgeOne 自动提供免费证书）
+```bash
+npm run start
+```
 
-4. **部署 Next.js 应用**
-   - 在服务器上执行 `npm run build && npm run start`
-   - 或使用 Docker 部署：
-   ```dockerfile
-   FROM node:18-alpine
-   WORKDIR /app
-   COPY package*.json ./
-   RUN npm ci
-   COPY . .
-   RUN npm run build
-   EXPOSE 3000
-   CMD ["npm", "start"]
-   ```
+3. **使用 Docker 部署**
 
-5. **绑定域名**
-   - 在 EdgeOne 站点设置中添加域名
-   - 配置 DNS 解析指向 EdgeOne 分配的 CNAME 地址
-   - 开启 HTTPS 强制跳转
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+EXPOSE 3000
+CMD ["npm", "start"]
+```
 
-6. **验证访问**
-   - 通过域名访问应用，确认功能正常
+4. **配置 EdgeOne CDN 加速**
+   - 在 EdgeOne 控制台创建站点
+   - 配置源站为你的服务器地址
+   - 绑定域名并开启 HTTPS
 
 ## 📁 项目结构
 

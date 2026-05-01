@@ -17,7 +17,7 @@ type UserProgressState = {
   setTotalCorrect: (total: number) => void;
   setChapterCorrect: (data: Record<string, number>) => void;
   setLoading: (loading: boolean) => void;
-  hydrate: (data: { hearts: number; xp: number; streak: number; total_correct?: number; chapter_correct?: Record<string, number> }) => void;
+  hydrate: (data: { hearts: number; xp: number; streak: number; total_correct?: number; chapter_correct?: Record<string, number>; last_hearts_reset?: string }) => void;
 };
 
 export const useUserProgress = create<UserProgressState>((set) => ({

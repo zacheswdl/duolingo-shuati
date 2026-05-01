@@ -43,3 +43,10 @@ next-env.d.ts
 # ide
 .trae/
 .gh-config/
+
+# Tencent Cloud EdgeOne
+.env
+.edgeone/*
+.tef_dist/*
+
+Library/

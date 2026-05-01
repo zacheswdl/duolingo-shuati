@@ -13,8 +13,8 @@ import { useExitModal } from "@/store/use-exit-modal";
 import { useCheckinStore } from "@/store/use-checkin";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { XP_PER_CORRECT } from "@/lib/constants";
-import { addXp as addXpToServer, recordAnswer, updateDailyTaskProgress, checkAndUnlockAchievements, toggleFavorite } from "@/lib/supabase/actions";
+import { XP_PER_CORRECT, HEARTS_MAX } from "@/lib/constants";
+import { addXp as addXpToServer, recordAnswer, updateDailyTaskProgress, checkAndUnlockAchievements, toggleFavorite, removeHeart as removeHeartServer, addHeart as addHeartServer, refreshUserProgress } from "@/lib/supabase/actions";
 import { AchievementModal } from "@/components/modals/achievement-modal";
 import { DailyTaskModal } from "@/components/modals/daily-task-modal";
 import { CheckinModal } from "@/components/modals/checkin-modal";
@@ -41,7 +41,7 @@ export const Quiz = ({
 }: Props) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { hearts, xp, streak, removeHeart, addXp, addHeart, incrementCorrect } = useUserProgress();
+  const { hearts, xp, streak, removeHeart, addXp, addHeart, incrementCorrect, setXp } = useUserProgress();
   const { open: openHeartsModal } = useHeartsModal();
   const { open: openExitModal } = useExitModal();
   const { 
@@ -69,7 +69,6 @@ export const Quiz = ({
   const [score, setScore] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [pending, setPending] = useState(false);
-  const [practiceCorrectCount, setPracticeCorrectCount] = useState(0);
   const [answers, setAnswers] = useState<Record<number, { option: string; isCorrect: boolean }>>({});
   const [showAchievementModal, setShowAchievementModal] = useState(false);
   const [newAchievements, setNewAchievements] = useState<string[]>([]);
@@ -157,6 +156,11 @@ export const Quiz = ({
   const handleSubmit = async () => {
     if (selectedOptions.length === 0 || !currentQuestion || pending) return;
 
+    if (!isExam && !isMistakeRecovery && hearts <= 0) {
+      openHeartsModal();
+      return;
+    }
+
     setPending(true);
     
     // 判断答案是否正确
@@ -190,7 +194,11 @@ export const Quiz = ({
       setScore((prev) => prev + 1);
       addXp(XP_PER_CORRECT);
       incrementCorrect(currentQuestion.chapter);
-      addXpToServer(XP_PER_CORRECT).catch((e) =>
+      addXpToServer(XP_PER_CORRECT).then((result) => {
+        if (result?.success && result.newXp > 0) {
+          setXp(result.newXp);
+        }
+      }).catch((e) =>
         console.error("Failed to persist xp:", e)
       );
 
@@ -209,13 +217,12 @@ export const Quiz = ({
       }
 
       // 错题恢复模式：累计答对计数
-      if (isMistakeRecovery) {
-        const newCount = practiceCorrectCount + 1;
-        setPracticeCorrectCount(newCount);
-        if (newCount % 3 === 0) {
-          addHeart();
-          toast.success("连续答对3道错题！恢复1颗红心", { duration: 3000 });
-        }
+      if (isMistakeRecovery && hearts < HEARTS_MAX) {
+        addHeart();
+        addHeartServer().catch((e) =>
+          console.error("Failed to persist heart recovery:", e)
+        );
+        toast.success("答对错题！恢复1颗红心", { duration: 3000 });
       }
 
       // 显示 XP 飘出动画
@@ -236,6 +243,9 @@ export const Quiz = ({
       // 非模拟考试模式扣心
       if (!isExam && !isMistakeRecovery) {
         removeHeart();
+        removeHeartServer().catch((e) =>
+          console.error("Failed to persist heart removal:", e)
+        );
         if (hearts <= 1) {
           setTimeout(() => openHeartsModal(), 500);
         }
@@ -263,20 +273,25 @@ export const Quiz = ({
       xpEarned,
     };
 
-    // 非考试模式：更新每日任务进度
+    try {
+      const refreshed = await refreshUserProgress();
+      if (refreshed && refreshed.xp > 0) {
+        setXp(refreshed.xp);
+      }
+    } catch (e) {
+      console.error("Failed to refresh progress:", e);
+    }
+
     if (!isExam && !isMistakeRecovery) {
       try {
-        // 更新章节练习任务
         await updateDailyTaskProgress("chapter_practice", 1);
 
-        // 检查成就
         const newAchievementKeys = await checkAndUnlockAchievements();
         if (newAchievementKeys.length > 0) {
           setNewAchievements(newAchievementKeys);
           setTimeout(() => setShowAchievementModal(true), 500);
         }
 
-        // 检查每日任务
         const { getDailyTasks } = await import("@/lib/supabase/actions");
         const tasks = await getDailyTasks();
         const completed = tasks.filter((t: any) => t.completed && !t.claimed);
@@ -294,8 +309,7 @@ export const Quiz = ({
     } else if (isExam) {
       router.push(`/exam/result?correct=${score}&total=${totalQuestions}&xp=${xpEarned}`);
     }
-    // 非考试模式，不自动跳转，让用户点击按钮
-  }, [score, totalQuestions, router, isExam, onComplete]);
+  }, [score, totalQuestions, router, isExam, onComplete, setXp]);
 
   // 如果红心为0且非错题恢复模式和非模拟考试，弹出提示
   useEffect(() => {
@@ -356,8 +370,12 @@ export const Quiz = ({
           open={showDailyTaskModal}
           completedTasks={completedDailyTasks}
           onClose={() => setShowDailyTaskModal(false)}
-          onClaimed={() => {
-            addXp(100);
+          onClaimed={(newXp) => {
+            if (newXp && newXp > 0) {
+              setXp(newXp);
+            } else {
+              addXp(100);
+            }
           }}
         />
       </>

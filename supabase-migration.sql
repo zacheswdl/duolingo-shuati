@@ -94,11 +94,26 @@ $$;
 -- ============ 增加经验值函数 ============
 
 CREATE OR REPLACE FUNCTION add_xp(p_user_id UUID, p_amount INTEGER)
-RETURNS VOID LANGUAGE plpgsql AS $$
+RETURNS INTEGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  new_xp INTEGER;
 BEGIN
+  IF auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated';
+  END IF;
+  IF auth.uid() != p_user_id THEN
+    RAISE EXCEPTION 'Cannot add XP for another user';
+  END IF;
   UPDATE user_progress
   SET xp = xp + p_amount
-  WHERE user_id = p_user_id;
+  WHERE user_id = p_user_id
+  RETURNING xp INTO new_xp;
+  IF new_xp IS NULL THEN
+    INSERT INTO user_progress (user_id, hearts, xp, streak, total_correct, chapter_correct, last_hearts_reset)
+    VALUES (p_user_id, 5, p_amount, 0, 0, '{}', CURRENT_DATE)
+    RETURNING xp INTO new_xp;
+  END IF;
+  RETURN new_xp;
 END;
 $$;
 

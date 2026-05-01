@@ -8,9 +8,6 @@ export const HEARTS_MAX = 5;
 /** 每答对一题获得的经验值 */
 export const XP_PER_CORRECT = 10;
 
-/** 错题恢复：连续答对多少题恢复1颗心 */
-export const MISTAKE_RECOVERY_COUNT = 3;
-
 /** 模拟考试题量 */
 export const EXAM_QUESTION_COUNT = 50;
 

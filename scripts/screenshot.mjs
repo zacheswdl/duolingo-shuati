@@ -1,8 +1,9 @@
 import { chromium } from "playwright";
 
 const BASE_URL = "http://localhost:3000";
+const LOGIN_EMAIL = process.env.SCREENSHOT_EMAIL || "";
+const LOGIN_PASSWORD = process.env.SCREENSHOT_PASSWORD || "";
 
-// 模拟 iPhone 14 Pro 尺寸 (390x844)
 const MOBILE_VIEWPORT = { width: 390, height: 844 };
 
 const PAGES = [
@@ -24,11 +25,26 @@ async function main() {
 
   const page = await context.newPage();
 
+  if (LOGIN_EMAIL && LOGIN_PASSWORD) {
+    console.log("🔐 正在登录...");
+    await page.goto(`${BASE_URL}/auth/login`, { waitUntil: "networkidle", timeout: 15000 });
+    await page.waitForTimeout(500);
+
+    await page.fill('input[name="email"]', LOGIN_EMAIL);
+    await page.fill('input[name="password"]', LOGIN_PASSWORD);
+    await page.click('button[type="submit"]');
+
+    await page.waitForURL("**/learn", { timeout: 15000 });
+    await page.waitForTimeout(1000);
+    console.log("✅ 登录成功");
+  } else {
+    console.log("⚠️ 未设置 SCREENSHOT_EMAIL/SCREENSHOT_PASSWORD，跳过登录");
+  }
+
   for (const { path, name } of PAGES) {
     try {
       await page.goto(`${BASE_URL}${path}`, { waitUntil: "networkidle", timeout: 15000 });
-      // 等待一确保页面渲染完成
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(800);
       await page.screenshot({
         path: `screenshots/${name}.png`,
         fullPage: true,
@@ -39,13 +55,12 @@ async function main() {
     }
   }
 
-  // 单独截图答题页面
   try {
     await page.goto(`${BASE_URL}/lesson?chapter=chapter_single`, {
       waitUntil: "networkidle",
       timeout: 15000,
     });
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(1500);
     await page.screenshot({
       path: "screenshots/05-答题页面.png",
       fullPage: true,

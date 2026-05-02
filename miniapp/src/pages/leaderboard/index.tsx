@@ -47,13 +47,6 @@ export default function LeaderboardPage() {
     return '';
   };
 
-  const getMedal = (rank: number) => {
-    if (rank === 1) return '🥇';
-    if (rank === 2) return '🥈';
-    if (rank === 3) return '🥉';
-    return '';
-  };
-
   const sortedTop = [...topThree].sort((a, b) => {
     if (a.rank === 1) return 0;
     if (b.rank === 1) return 0;

@@ -29,8 +29,8 @@ export default function LessonPage() {
   const [showHeartsModal, setShowHeartsModal] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
-  const [xpEarned, setXpEarned] = useState(0);
-  const [correctCount, setCorrectCount] = useState(0);
+  const [_xpEarned, setXpEarned] = useState(0);
+  const [_correctCount, setCorrectCount] = useState(0);
 
   const [examAnswers, setExamAnswers] = useState<Record<number, string>>({});
   const [examTimeLeft, setExamTimeLeft] = useState(EXAM_TIME_MINUTES * 60);

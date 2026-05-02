@@ -4,17 +4,11 @@ export default defineAppConfig({
     'pages/exam/index',
     'pages/mistakes/index',
     'pages/profile/index',
+    'pages/login/index',
     'pages/lesson/index',
     'pages/exam/result/index',
     'pages/favorites/index',
     'pages/leaderboard/index',
-    'pages/login/index',
-  ],
-  subPackages: [
-    {
-      root: 'pagesExam',
-      pages: ['result/index'],
-    },
   ],
   tabBar: {
     color: '#999999',

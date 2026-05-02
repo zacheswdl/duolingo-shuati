@@ -23,14 +23,14 @@ export default function IndexPage() {
         getDailyTasks(),
       ]);
       setStats(statsData);
-      setChapters(chaptersData);
+      setChapters(chaptersData as string[]);
       setLeaderboard(leaderboardData);
       setDailyTasks(tasksData);
 
       const questionsMap: Record<string, Question[]> = {};
-      for (const ch of chaptersData) {
-        const qs = await getQuestions(ch);
-        questionsMap[ch] = qs;
+      for (const ch of (chaptersData as string[])) {
+        const qs = await getQuestions(ch as string);
+        questionsMap[ch as string] = qs;
       }
       setChapterQuestions(questionsMap);
     } catch (err) {
@@ -150,7 +150,6 @@ export default function IndexPage() {
             {dailyTasks.map(task => {
               const def = getTaskDef(task.task_type);
               const progress = Math.min(task.progress, task.target);
-              const percent = task.target > 0 ? Math.round((progress / task.target) * 100) : 0;
               return (
                 <View key={task.id} className='task-item'>
                   <View className='task-info'>

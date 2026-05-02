@@ -166,7 +166,10 @@ export const Quiz = ({
     // 判断答案是否正确
     let isCorrect = false;
     if (isMultiple) {
-      const correctAnswers = currentQuestion.correct_answer.split(",").map((a) => a.trim().toUpperCase()).sort();
+      const rawAnswer = currentQuestion.correct_answer.trim().toUpperCase();
+      const correctAnswers = rawAnswer.includes(",")
+        ? rawAnswer.split(",").map((a) => a.trim()).filter(Boolean).sort()
+        : rawAnswer.split("").filter((c) => /[A-Z]/.test(c)).sort();
       const normalizedSelected = selectedOptions.map((a) => a.toUpperCase()).sort();
       isCorrect = JSON.stringify(normalizedSelected) === JSON.stringify(correctAnswers);
     } else {
@@ -475,7 +478,11 @@ export const Quiz = ({
               {optionsEntries.map(([key, value]) => {
                 const isSelected = selectedOptions.includes(key);
                 const isCorrectOption = isMultiple 
-                  ? currentQuestion.correct_answer.split(",").map((a) => a.trim().toUpperCase()).includes(key.toUpperCase())
+                  ? (() => {
+                      const raw = currentQuestion.correct_answer.trim().toUpperCase();
+                      const keys = raw.includes(",") ? raw.split(",").map((a) => a.trim()).filter(Boolean) : raw.split("").filter((c) => /[A-Z]/.test(c));
+                      return keys.includes(key.toUpperCase());
+                    })()
                   : key.toUpperCase() === currentQuestion.correct_answer.trim().toUpperCase();
                 let optionStatus: "default" | "selected" | "correct" | "wrong" = "default";
 

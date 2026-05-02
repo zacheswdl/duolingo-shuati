@@ -1,0 +1,108 @@
+@import '@/styles/variables.scss';
+
+.favorites-page {
+  min-height: 100vh;
+  background-color: $color-bg;
+  padding-bottom: 140px;
+
+  .favorite-count {
+    text-align: center;
+    padding: $spacing-sm 0;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  .favorite-list {
+    .favorite-item {
+      padding: $spacing-base;
+      background-color: $color-bg-white;
+      border-radius: $border-radius-base;
+      margin-bottom: $spacing-sm;
+      box-shadow: $shadow-sm;
+
+      .favorite-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: $spacing-sm;
+
+        .favorite-tags {
+          display: flex;
+          gap: 8px;
+        }
+
+        .remove-btn {
+          font-size: $font-size-sm;
+          color: $color-danger;
+          padding: 4px 16px;
+          border: 2px solid $color-danger;
+          border-radius: $border-radius-sm;
+          font-weight: 700;
+
+          &:active {
+            background-color: $color-danger-light;
+          }
+        }
+      }
+
+      .favorite-content {
+        font-size: $font-size-base;
+        color: $color-text-primary;
+        line-height: 1.6;
+        margin-bottom: $spacing-sm;
+      }
+
+      .favorite-answer {
+        padding: $spacing-sm;
+        background-color: #E8F5E9;
+        border-radius: $border-radius-sm;
+        margin-bottom: $spacing-xs;
+
+        .answer-label {
+          font-size: $font-size-xs;
+          color: #2E7D32;
+          font-weight: 700;
+        }
+
+        .answer-value {
+          font-size: $font-size-sm;
+          color: $color-text-primary;
+          margin-top: 4px;
+        }
+      }
+
+      .favorite-explanation {
+        padding: $spacing-sm;
+        background-color: #FFF8E1;
+        border-radius: $border-radius-sm;
+
+        .explanation-label {
+          font-size: $font-size-xs;
+          color: #F57F17;
+          font-weight: 700;
+        }
+
+        .explanation-value {
+          font-size: $font-size-sm;
+          color: $color-text-secondary;
+          margin-top: 4px;
+          line-height: 1.5;
+        }
+      }
+    }
+  }
+
+  .practice-all {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: $spacing-base;
+    background-color: $color-bg-white;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
+
+    .btn-primary {
+      width: 100%;
+    }
+  }
+}

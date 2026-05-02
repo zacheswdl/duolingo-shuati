@@ -1,0 +1,199 @@
+@import '@/styles/variables.scss';
+
+.profile-page {
+  min-height: 100vh;
+  background-color: $color-bg;
+  padding-bottom: 120px;
+
+  .user-card {
+    display: flex;
+    align-items: center;
+    padding: $spacing-lg $spacing-base;
+    background: linear-gradient(135deg, $color-primary, #7ED321);
+    border-radius: $border-radius-lg;
+    margin-bottom: $spacing-base;
+
+    .avatar {
+      width: 96px;
+      height: 96px;
+      border-radius: $border-radius-full;
+      background-color: rgba(255, 255, 255, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      margin-right: $spacing-base;
+    }
+
+    .user-info {
+      flex: 1;
+
+      .nickname {
+        font-size: $font-size-lg;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 8px;
+      }
+
+      .user-stats {
+        display: flex;
+        gap: $spacing-base;
+
+        .user-stat {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+
+          .stat-icon {
+            font-size: $font-size-sm;
+          }
+
+          .stat-val {
+            font-size: $font-size-sm;
+            font-weight: 700;
+            color: #ffffff;
+          }
+        }
+      }
+    }
+  }
+
+  .daily-tasks-section {
+    .task-list {
+      .task-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: $spacing-sm 0;
+        border-bottom: 1px solid $color-border;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .task-info {
+          flex: 1;
+
+          .task-name {
+            font-size: $font-size-sm;
+            font-weight: 700;
+            color: $color-text-primary;
+          }
+
+          .task-desc {
+            font-size: $font-size-xs;
+            color: $color-text-light;
+            margin-top: 4px;
+          }
+        }
+
+        .task-action {
+          .claim-btn {
+            padding: 8px 24px;
+            background-color: $color-primary;
+            color: #ffffff;
+            font-size: $font-size-xs;
+            font-weight: 700;
+            border-radius: $border-radius-sm;
+            box-shadow: 0 2px 0 $color-primary-dark;
+
+            &:active {
+              transform: translateY(1px);
+              box-shadow: 0 1px 0 $color-primary-dark;
+            }
+
+            &.disabled {
+              background-color: $color-border;
+              color: $color-text-light;
+              box-shadow: none;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .achievement-section {
+    .achievement-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: $spacing-xs;
+
+      .achievement-item {
+        width: calc(25% - 6px);
+        aspect-ratio: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: $color-bg;
+        border-radius: $border-radius-sm;
+        padding: 8px;
+
+        &.unlocked {
+          background-color: #FFF8E1;
+        }
+
+        .achievement-icon {
+          font-size: 36px;
+          margin-bottom: 4px;
+        }
+
+        .achievement-name {
+          font-size: 16px;
+          color: $color-text-secondary;
+          text-align: center;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          width: 100%;
+        }
+
+        &.unlocked .achievement-name {
+          color: $color-warning;
+          font-weight: 700;
+        }
+      }
+    }
+  }
+
+  .quick-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+
+    .link-item {
+      flex: 1;
+      min-width: calc(50% - 8px);
+      display: flex;
+      align-items: center;
+      padding: $spacing-base;
+      background-color: $color-bg-white;
+      border-radius: $border-radius-base;
+      box-shadow: $shadow-sm;
+
+      &:active {
+        background-color: $color-bg;
+      }
+
+      .link-icon {
+        font-size: 40px;
+        margin-right: $spacing-sm;
+      }
+
+      .link-text {
+        font-size: $font-size-sm;
+        font-weight: 700;
+        color: $color-text-primary;
+      }
+    }
+  }
+
+  .logout-section {
+    padding: $spacing-lg 0;
+
+    .btn-danger {
+      width: 100%;
+    }
+  }
+}

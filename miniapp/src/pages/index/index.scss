@@ -1,0 +1,204 @@
+@import '@/styles/variables.scss';
+
+.index-page {
+  min-height: 100vh;
+  background-color: $color-bg;
+  padding-bottom: 120px;
+
+  .stats-panel {
+    display: flex;
+    justify-content: space-around;
+    padding: $spacing-base 0;
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      .stat-value {
+        font-size: $font-size-xl;
+        font-weight: 700;
+        color: $color-primary;
+      }
+
+      .stat-label {
+        font-size: $font-size-xs;
+        color: $color-text-secondary;
+        margin-top: 4px;
+      }
+    }
+  }
+
+  .progress-section {
+    margin-bottom: $spacing-sm;
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: $spacing-xs;
+
+      .progress-text {
+        font-size: $font-size-sm;
+        color: $color-text-secondary;
+      }
+
+      .progress-percent {
+        font-size: $font-size-sm;
+        font-weight: 700;
+        color: $color-primary;
+      }
+    }
+  }
+
+  .chapter-section {
+    .chapter-list {
+      .chapter-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: $spacing-base;
+        background-color: $color-bg-white;
+        border-radius: $border-radius-base;
+        margin-bottom: $spacing-sm;
+        box-shadow: $shadow-sm;
+
+        &:active {
+          background-color: $color-bg;
+        }
+
+        .chapter-info {
+          flex: 1;
+
+          .chapter-name {
+            font-size: $font-size-base;
+            font-weight: 700;
+            color: $color-text-primary;
+            margin-bottom: 8px;
+          }
+
+          .chapter-meta {
+            display: flex;
+            gap: $spacing-sm;
+
+            .meta-tag {
+              font-size: $font-size-xs;
+              color: $color-text-light;
+            }
+          }
+        }
+
+        .chapter-arrow {
+          font-size: $font-size-lg;
+          color: $color-text-light;
+          margin-left: $spacing-sm;
+        }
+      }
+    }
+  }
+
+  .leaderboard-preview {
+    .leaderboard-list {
+      .leaderboard-item {
+        display: flex;
+        align-items: center;
+        padding: $spacing-sm 0;
+        border-bottom: 1px solid $color-border;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .rank {
+          width: 48px;
+          font-size: $font-size-base;
+          font-weight: 700;
+          color: $color-text-secondary;
+          text-align: center;
+
+          &.rank-1 {
+            color: $color-gold;
+          }
+
+          &.rank-2 {
+            color: $color-silver;
+          }
+
+          &.rank-3 {
+            color: $color-bronze;
+          }
+        }
+
+        .name {
+          flex: 1;
+          font-size: $font-size-sm;
+          color: $color-text-primary;
+          margin-left: $spacing-sm;
+        }
+
+        .xp {
+          font-size: $font-size-sm;
+          font-weight: 700;
+          color: $color-primary;
+        }
+      }
+    }
+
+    .view-all {
+      text-align: center;
+      padding: $spacing-sm 0;
+      font-size: $font-size-sm;
+      color: $color-primary;
+      font-weight: 700;
+    }
+  }
+
+  .daily-tasks-section {
+    .task-list {
+      .task-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: $spacing-sm 0;
+        border-bottom: 1px solid $color-border;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .task-info {
+          flex: 1;
+
+          .task-name {
+            font-size: $font-size-sm;
+            font-weight: 700;
+            color: $color-text-primary;
+          }
+
+          .task-desc {
+            font-size: $font-size-xs;
+            color: $color-text-light;
+            margin-top: 4px;
+          }
+        }
+
+        .task-progress {
+          display: flex;
+          align-items: center;
+          gap: $spacing-xs;
+
+          .task-progress-text {
+            font-size: $font-size-xs;
+            color: $color-text-secondary;
+          }
+
+          .task-completed {
+            font-size: $font-size-xs;
+            color: $color-primary;
+            font-weight: 700;
+          }
+        }
+      }
+    }
+  }
+}

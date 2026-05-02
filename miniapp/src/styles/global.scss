@@ -1,0 +1,149 @@
+page {
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica,
+    Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB',
+    'Microsoft Yahei', sans-serif;
+  font-size: $font-size-base;
+  color: $color-text-primary;
+  background-color: $color-bg;
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+.container {
+  padding: $spacing-base;
+}
+
+.card {
+  background-color: $color-bg-white;
+  border-radius: $border-radius-base;
+  padding: $spacing-base;
+  box-shadow: $shadow-sm;
+  margin-bottom: $spacing-base;
+}
+
+.btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $color-primary;
+  color: #ffffff;
+  font-size: $font-size-base;
+  font-weight: 700;
+  border-radius: $border-radius-base;
+  padding: 24px 0;
+  border: none;
+  text-transform: lowercase;
+  box-shadow: 0 4px 0 $color-primary-dark;
+
+  &:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 $color-primary-dark;
+  }
+}
+
+.btn-danger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $color-danger;
+  color: #ffffff;
+  font-size: $font-size-base;
+  font-weight: 700;
+  border-radius: $border-radius-base;
+  padding: 24px 0;
+  border: none;
+  text-transform: lowercase;
+  box-shadow: 0 4px 0 #e04343;
+
+  &:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #e04343;
+  }
+}
+
+.btn-outline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  color: $color-text-secondary;
+  font-size: $font-size-base;
+  font-weight: 700;
+  border-radius: $border-radius-base;
+  padding: 24px 0;
+  border: 2px solid $color-border;
+  text-transform: lowercase;
+
+  &:active {
+    background-color: $color-bg;
+  }
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 16px;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-xs;
+  font-weight: 700;
+}
+
+.tag-single {
+  background-color: #E8F5E9;
+  color: #2E7D32;
+}
+
+.tag-multiple {
+  background-color: #E3F2FD;
+  color: #1565C0;
+}
+
+.tag-judge {
+  background-color: #FFF3E0;
+  color: #E65100;
+}
+
+.section-title {
+  font-size: $font-size-lg;
+  font-weight: 700;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 0;
+
+  .empty-icon {
+    font-size: 80px;
+    margin-bottom: $spacing-base;
+  }
+
+  .empty-text {
+    font-size: $font-size-base;
+    color: $color-text-light;
+  }
+}
+
+.progress-bar {
+  width: 100%;
+  height: 16px;
+  background-color: $color-border;
+  border-radius: 8px;
+  overflow: hidden;
+
+  .progress-fill {
+    height: 100%;
+    background-color: $color-primary;
+    border-radius: 8px;
+    transition: width 0.3s ease;
+  }
+}

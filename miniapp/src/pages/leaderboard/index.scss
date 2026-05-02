@@ -1,0 +1,188 @@
+@import '@/styles/variables.scss';
+
+.leaderboard-page {
+  min-height: 100vh;
+  background-color: $color-bg;
+
+  .top-three {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: $spacing-lg $spacing-base;
+    background: linear-gradient(135deg, $color-primary, #7ED321);
+    padding-bottom: $spacing-xl;
+
+    .top-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0 $spacing-sm;
+
+      &.rank-1 {
+        .top-avatar {
+          width: 96px;
+          height: 96px;
+          font-size: 48px;
+        }
+
+        .top-crown {
+          font-size: 40px;
+        }
+      }
+
+      &.rank-2 {
+        .top-avatar {
+          width: 80px;
+          height: 80px;
+          font-size: 40px;
+        }
+      }
+
+      &.rank-3 {
+        .top-avatar {
+          width: 80px;
+          height: 80px;
+          font-size: 40px;
+        }
+      }
+
+      .top-crown {
+        font-size: 32px;
+        margin-bottom: 4px;
+      }
+
+      .top-avatar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: $border-radius-full;
+        background-color: rgba(255, 255, 255, 0.3);
+        margin-bottom: $spacing-xs;
+      }
+
+      .top-name {
+        font-size: $font-size-sm;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 4px;
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .top-xp {
+        font-size: $font-size-xs;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .top-medal {
+        font-size: 32px;
+        margin-top: 4px;
+      }
+    }
+  }
+
+  .my-rank-card {
+    margin: -24px $spacing-base $spacing-base;
+    background-color: $color-bg-white;
+    border-radius: $border-radius-base;
+    padding: $spacing-base;
+    box-shadow: $shadow-base;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .my-rank-left {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+
+      .my-rank-label {
+        font-size: $font-size-base;
+        font-weight: 700;
+        color: $color-text-primary;
+      }
+
+      .my-rank-position {
+        font-size: $font-size-lg;
+        font-weight: 700;
+        color: $color-primary;
+      }
+    }
+
+    .my-rank-xp {
+      font-size: $font-size-base;
+      font-weight: 700;
+      color: $color-primary;
+    }
+  }
+
+  .ranking-list {
+    padding: 0 $spacing-base;
+
+    .ranking-item {
+      display: flex;
+      align-items: center;
+      padding: $spacing-base;
+      background-color: $color-bg-white;
+      border-radius: $border-radius-base;
+      margin-bottom: $spacing-xs;
+      box-shadow: $shadow-sm;
+
+      .rank-number {
+        width: 56px;
+        font-size: $font-size-lg;
+        font-weight: 700;
+        color: $color-text-secondary;
+        text-align: center;
+
+        &.gold {
+          color: $color-gold;
+        }
+
+        &.silver {
+          color: $color-silver;
+        }
+
+        &.bronze {
+          color: $color-bronze;
+        }
+      }
+
+      .rank-avatar {
+        width: 64px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: $border-radius-full;
+        background-color: $color-bg;
+        font-size: 32px;
+        margin-right: $spacing-sm;
+      }
+
+      .rank-info {
+        flex: 1;
+
+        .rank-name {
+          font-size: $font-size-base;
+          font-weight: 700;
+          color: $color-text-primary;
+        }
+
+        .rank-streak {
+          font-size: $font-size-xs;
+          color: $color-text-light;
+          margin-top: 4px;
+        }
+      }
+
+      .rank-xp {
+        font-size: $font-size-base;
+        font-weight: 700;
+        color: $color-primary;
+      }
+    }
+  }
+}

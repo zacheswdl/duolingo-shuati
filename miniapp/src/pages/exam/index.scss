@@ -1,0 +1,88 @@
+@import '@/styles/variables.scss';
+
+.exam-page {
+  min-height: 100vh;
+  background-color: $color-bg;
+  padding-bottom: 120px;
+
+  .exam-header {
+    text-align: center;
+    padding: $spacing-xl 0;
+
+    .exam-icon {
+      font-size: 120px;
+      margin-bottom: $spacing-base;
+    }
+
+    .exam-title {
+      font-size: $font-size-xxl;
+      font-weight: 700;
+      color: $color-text-primary;
+      margin-bottom: $spacing-sm;
+    }
+
+    .exam-subtitle {
+      font-size: $font-size-base;
+      color: $color-text-secondary;
+    }
+  }
+
+  .rules-card {
+    .rule-list {
+      .rule-item {
+        display: flex;
+        align-items: center;
+        padding: $spacing-sm 0;
+        border-bottom: 1px solid $color-border;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .rule-icon {
+          width: 48px;
+          height: 48px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: $font-size-lg;
+          margin-right: $spacing-sm;
+          background-color: #E8F5E9;
+          border-radius: $border-radius-sm;
+        }
+
+        .rule-content {
+          flex: 1;
+
+          .rule-label {
+            font-size: $font-size-sm;
+            color: $color-text-secondary;
+          }
+
+          .rule-value {
+            font-size: $font-size-base;
+            font-weight: 700;
+            color: $color-text-primary;
+          }
+        }
+      }
+    }
+  }
+
+  .start-section {
+    padding: $spacing-lg 0;
+
+    .btn-primary {
+      width: 100%;
+      font-size: $font-size-lg;
+    }
+  }
+
+  .tips-card {
+    .tip-text {
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
+      line-height: 1.6;
+    }
+  }
+}

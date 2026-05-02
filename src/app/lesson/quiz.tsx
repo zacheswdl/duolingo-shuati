@@ -166,12 +166,11 @@ export const Quiz = ({
     // 判断答案是否正确
     let isCorrect = false;
     if (isMultiple) {
-      // 多选题：比较选中的选项数组与正确答案数组
-      const correctAnswers = currentQuestion.correct_answer.split(",").sort();
-      isCorrect = JSON.stringify(selectedOptions) === JSON.stringify(correctAnswers);
+      const correctAnswers = currentQuestion.correct_answer.split(",").map((a) => a.trim().toUpperCase()).sort();
+      const normalizedSelected = selectedOptions.map((a) => a.toUpperCase()).sort();
+      isCorrect = JSON.stringify(normalizedSelected) === JSON.stringify(correctAnswers);
     } else {
-      // 单选/判断题：比较单个选项
-      isCorrect = selectedOptions[0] === currentQuestion.correct_answer;
+      isCorrect = selectedOptions[0].toUpperCase() === currentQuestion.correct_answer.trim().toUpperCase();
     }
     
     setAnswers((prev) => ({
@@ -476,8 +475,8 @@ export const Quiz = ({
               {optionsEntries.map(([key, value]) => {
                 const isSelected = selectedOptions.includes(key);
                 const isCorrectOption = isMultiple 
-                  ? currentQuestion.correct_answer.split(",").includes(key)
-                  : key === currentQuestion.correct_answer;
+                  ? currentQuestion.correct_answer.split(",").map((a) => a.trim().toUpperCase()).includes(key.toUpperCase())
+                  : key.toUpperCase() === currentQuestion.correct_answer.trim().toUpperCase();
                 let optionStatus: "default" | "selected" | "correct" | "wrong" = "default";
 
                 if (status !== "none") {
@@ -616,16 +615,19 @@ export const Quiz = ({
                       正确答案是：
                       {isMultiple ? (
                         <span className="font-bold text-[#58cc02]">
-                          {currentQuestion.correct_answer.split(",").map((key, index) => (
-                            <span key={key}>
-                              {index > 0 && ", "}
-                              {key}. {currentQuestion.options[key]}
-                            </span>
-                          ))}
+                          {currentQuestion.correct_answer.split(",").map((ans, index) => {
+                            const key = ans.trim().toUpperCase();
+                            return (
+                              <span key={key}>
+                                {index > 0 && ", "}
+                                {key}. {currentQuestion.options[key] || currentQuestion.options[ans.trim()]}
+                              </span>
+                            );
+                          })}
                         </span>
                       ) : (
                         <span className="font-bold text-[#58cc02]">
-                          {currentQuestion.correct_answer}. {currentQuestion.options[currentQuestion.correct_answer]}
+                          {currentQuestion.correct_answer.trim().toUpperCase()}. {currentQuestion.options[currentQuestion.correct_answer.trim().toUpperCase()] || currentQuestion.options[currentQuestion.correct_answer.trim()]}
                         </span>
                       )}
                     </p>

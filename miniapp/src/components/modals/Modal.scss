@@ -1,0 +1,69 @@
+@import '@/styles/variables.scss';
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-container {
+  background-color: $color-bg-white;
+  border-radius: $border-radius-lg;
+  width: 80%;
+  max-width: 600px;
+  overflow: hidden;
+  animation: slideUp 0.3s ease;
+  box-shadow: $shadow-lg;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-base $spacing-base 0;
+}
+
+.modal-title {
+  font-size: $font-size-lg;
+  font-weight: 700;
+  color: $color-text-primary;
+}
+
+.modal-close {
+  font-size: $font-size-lg;
+  color: $color-text-light;
+  padding: $spacing-xs;
+  line-height: 1;
+}
+
+.modal-body {
+  padding: $spacing-base;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

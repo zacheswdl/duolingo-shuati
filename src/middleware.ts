@@ -32,7 +32,7 @@ export async function middleware(request: NextRequest) {
 
     const { pathname } = request.nextUrl;
 
-    const authPaths = ["/auth/login", "/auth/register", "/auth/forgot-password", "/auth/reset-password", "/auth/callback"];
+    const authPaths = ["/auth/login", "/auth/register", "/auth/reset-password", "/auth/callback"];
 
     if (user && authPaths.includes(pathname)) {
       const response = NextResponse.redirect(new URL("/learn", request.url));

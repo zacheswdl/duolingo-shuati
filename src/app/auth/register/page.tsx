@@ -2,15 +2,17 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Loader2, Eye, EyeOff, Mail, CheckCircle, ArrowLeft, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { signUpClient, resendOtpClient } from "@/lib/auth-client";
+import { signUpClient, resendOtpClient, verifyOtpClient } from "@/lib/auth-client";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [step, setStep] = useState<"form" | "confirm">("form");
+  const [step, setStep] = useState<"form" | "verify">("form");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -22,7 +24,12 @@ export default function RegisterPage() {
   const [sendPending, setSendPending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
 
-  // 倒计时
+  const [otpValues, setOtpValues] = useState<string[]>(["", "", "", "", "", ""]);
+  const [verifyPending, setVerifyPending] = useState(false);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
+  const [verifySuccess, setVerifySuccess] = useState(false);
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
   useEffect(() => {
     if (resendCooldown > 0) {
       timerRef.current = window.setInterval(() => {
@@ -45,6 +52,8 @@ export default function RegisterPage() {
   const handleResend = async () => {
     if (resendCooldown > 0 || !email) return;
     setResendError(null);
+    setOtpValues(["", "", "", "", "", ""]);
+    setVerifyError(null);
     const result = await resendOtpClient(email);
     if (result.success) {
       setResendCooldown(60);
@@ -53,7 +62,6 @@ export default function RegisterPage() {
     }
   };
 
-  // 前端表单验证
   const validateForm = (emailVal: string, pwd: string, confirmPwd: string): string | null => {
     if (!emailVal) {
       return "请填写邮箱";
@@ -73,7 +81,6 @@ export default function RegisterPage() {
     return null;
   };
 
-  // 使用 onSubmit 阻止默认表单提交，保留输入框内容
   const handleFormSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setClientError(null);
@@ -99,26 +106,89 @@ export default function RegisterPage() {
     } else {
       setEmail(emailVal);
       setPassword(pwd);
-      setStep("confirm");
+      setStep("verify");
       setResendCooldown(60);
       setSendPending(false);
+      setTimeout(() => otpInputRefs.current[0]?.focus(), 100);
     }
   }, []);
 
-  // 返回上一步
-  const handleBack = () => {
-    setStep("form");
+  const handleOtpChange = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return;
+
+    const newOtpValues = [...otpValues];
+    newOtpValues[index] = value.slice(-1);
+    setOtpValues(newOtpValues);
+    setVerifyError(null);
+
+    if (value && index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
   };
 
-  // 合并显示的错误信息
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !otpValues[index] && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (pastedData.length === 0) return;
+
+    const newOtpValues = [...otpValues];
+    for (let i = 0; i < 6; i++) {
+      newOtpValues[i] = pastedData[i] || "";
+    }
+    setOtpValues(newOtpValues);
+
+    const nextEmptyIndex = pastedData.length < 6 ? pastedData.length : 5;
+    otpInputRefs.current[nextEmptyIndex]?.focus();
+  };
+
+  const handleVerify = async () => {
+    const token = otpValues.join("");
+    if (token.length !== 6) {
+      setVerifyError("请输入完整的6位验证码");
+      return;
+    }
+
+    setVerifyPending(true);
+    setVerifyError(null);
+    const result = await verifyOtpClient(email, token);
+    if (result.error) {
+      setVerifyError(result.error);
+      setVerifyPending(false);
+    } else {
+      setVerifySuccess(true);
+      setVerifyPending(false);
+      setTimeout(() => {
+        router.push("/learn");
+      }, 1500);
+    }
+  };
+
+  useEffect(() => {
+    const token = otpValues.join("");
+    if (token.length === 6 && !verifyPending && !verifySuccess) {
+      handleVerify();
+    }
+  }, [otpValues]);
+
+  const handleBack = () => {
+    setStep("form");
+    setOtpValues(["", "", "", "", "", ""]);
+    setVerifyError(null);
+  };
+
   const errorMessage = sendError;
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* 顶部装饰 */}
       <div className="bg-gradient-to-b from-[#58cc02] to-[#4aad02] pt-12 pb-16 px-6">
         <div className="max-w-sm mx-auto text-center relative">
-          {step === "confirm" && (
+          {step === "verify" && !verifySuccess && (
             <button
               onClick={handleBack}
               className="absolute left-0 top-1/2 -translate-y-1/2 text-white/80 hover:text-white transition-colors"
@@ -132,10 +202,12 @@ export default function RegisterPage() {
             transition={{ type: "spring", stiffness: 200, damping: 15 }}
             className="w-20 h-20 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm"
           >
-            {step === "form" ? (
+            {verifySuccess ? (
+              <CheckCircle className="w-10 h-10 text-white" />
+            ) : step === "form" ? (
               <Mail className="w-10 h-10 text-white" />
             ) : (
-              <CheckCircle className="w-10 h-10 text-white" />
+              <Mail className="w-10 h-10 text-white" />
             )}
           </motion.div>
           <motion.h1
@@ -144,7 +216,7 @@ export default function RegisterPage() {
             transition={{ delay: 0.1 }}
             className="text-3xl font-bold text-white"
           >
-            {step === "form" ? "创建账号" : "验证邮箱"}
+            {verifySuccess ? "注册成功" : step === "form" ? "创建账号" : "验证邮箱"}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 10 }}
@@ -152,14 +224,15 @@ export default function RegisterPage() {
             transition={{ delay: 0.2 }}
             className="text-white/80 mt-1 text-sm"
           >
-            {step === "form"
-              ? "注册账号，开始刷题练习"
-              : "请查收邮箱中的确认邮件"}
+            {verifySuccess
+              ? "正在跳转到主页..."
+              : step === "form"
+                ? "注册账号，开始刷题练习"
+                : "输入邮箱收到的6位验证码"}
           </motion.p>
         </div>
       </div>
 
-      {/* 表单区域 */}
       <div className="flex-1 -mt-8 px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -169,7 +242,6 @@ export default function RegisterPage() {
         >
           <AnimatePresence mode="wait">
             {step === "form" ? (
-              /* ========== 第一步：邮箱 + 密码 + 确认密码 ========== */
               <motion.form
                 key="form"
                 ref={formRef}
@@ -249,8 +321,8 @@ export default function RegisterPage() {
                   <p className="font-bold mb-1">📋 注册流程：</p>
                   <ol className="list-decimal list-inside space-y-0.5">
                     <li>填写邮箱、密码、确认密码 → 点击"注册"</li>
-                    <li>系统发送确认邮件到邮箱</li>
-                    <li>去邮箱点击确认链接 → 自动完成注册并登录</li>
+                    <li>系统发送6位验证码到邮箱</li>
+                    <li>输入验证码 → 完成注册并登录</li>
                   </ol>
                 </div>
 
@@ -268,35 +340,82 @@ export default function RegisterPage() {
                   )}
                 </Button>
               </motion.form>
-            ) : (
-              /* ========== 第二步：确认邮件已发送 ========== */
+            ) : verifySuccess ? (
               <motion.div
-                key="confirm"
+                key="success"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-8"
+              >
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                  className="w-16 h-16 bg-[#58cc02] rounded-full flex items-center justify-center mx-auto mb-4"
+                >
+                  <CheckCircle className="w-8 h-8 text-white" />
+                </motion.div>
+                <p className="text-lg font-bold text-slate-700">注册成功！</p>
+                <p className="text-sm text-slate-500 mt-1">正在跳转到主页...</p>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="verify"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
               >
                 <div className="mb-6 text-center">
                   <p className="text-sm text-slate-500 mb-1">
-                    确认邮件已发送至
+                    验证码已发送至
                   </p>
                   <p className="text-base font-bold text-slate-700">{email}</p>
                 </div>
 
                 <div className="space-y-4">
-                  {resendError && (
+                  {(verifyError || resendError) && (
                     <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm font-medium">
-                      {resendError}
+                      {verifyError || resendError}
                     </div>
                   )}
 
-                  <div className="bg-blue-50 border border-blue-200 text-blue-700 rounded-xl px-4 py-4 text-sm leading-relaxed">
-                    <p className="font-bold mb-1">📧 请查收邮件</p>
-                    <p>我们已向您的邮箱发送了一封确认邮件，请点击邮件中的链接完成注册。</p>
-                    <p className="mt-2 text-blue-500">如果没有收到，请检查垃圾邮件箱。</p>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-600 mb-3 text-center">
+                      输入6位验证码
+                    </label>
+                    <div className="flex justify-center gap-2">
+                      {otpValues.map((value, index) => (
+                        <input
+                          key={index}
+                          ref={(el) => { otpInputRefs.current[index] = el; }}
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={1}
+                          value={value}
+                          onChange={(e) => handleOtpChange(index, e.target.value)}
+                          onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                          onPaste={index === 0 ? handleOtpPaste : undefined}
+                          className="w-11 h-13 text-center text-xl font-bold rounded-xl border-2 border-slate-200 text-slate-700 focus:outline-none focus:border-[#58cc02] focus:ring-2 focus:ring-[#58cc02]/20 transition-all"
+                        />
+                      ))}
+                    </div>
                   </div>
 
-                  {/* 重新发送 */}
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="xl"
+                    className="w-full"
+                    disabled={verifyPending || otpValues.join("").length !== 6}
+                    onClick={handleVerify}
+                  >
+                    {verifyPending ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      "验证"
+                    )}
+                  </Button>
+
                   <div className="text-center">
                     <button
                       type="button"
@@ -307,29 +426,19 @@ export default function RegisterPage() {
                       <RefreshCw className={`w-3.5 h-3.5 ${resendCooldown > 0 ? "animate-spin" : ""}`} />
                       {resendCooldown > 0
                         ? `${resendCooldown}s 后重新发送`
-                        : "重新发送确认邮件"}
+                        : "重新发送验证码"}
                     </button>
                   </div>
 
-                  <Link
-                    href="/auth/login"
-                    className="block w-full"
-                  >
-                    <Button
-                      type="button"
-                      variant="primary"
-                      size="xl"
-                      className="w-full"
-                    >
-                      前往登录
-                    </Button>
-                  </Link>
+                  <div className="bg-blue-50 border border-blue-200 text-blue-700 rounded-xl px-4 py-3 text-xs leading-relaxed">
+                    <p className="font-bold mb-1">💡 提示</p>
+                    <p>验证码有效期为24小时。如果没有收到，请检查垃圾邮件箱。</p>
+                  </div>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* 底部链接 */}
           {step === "form" && (
             <div className="mt-6 text-center">
               <p className="text-slate-400 text-sm">

@@ -37,9 +37,6 @@ export async function signUpClient(email: string, password: string) {
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options: {
-      emailRedirectTo: `${window.location.origin}/auth/callback?next=/learn`,
-    },
   });
 
   if (error) {
@@ -61,9 +58,6 @@ export async function resendOtpClient(email: string) {
   const { error } = await supabase.auth.resend({
     type: "signup",
     email,
-    options: {
-      emailRedirectTo: `${window.location.origin}/auth/callback?next=/learn`,
-    },
   });
 
   if (error) {
@@ -73,12 +67,29 @@ export async function resendOtpClient(email: string) {
   return { success: true as const };
 }
 
+export async function verifyOtpClient(email: string, token: string) {
+  const supabase = createClient();
+
+  const { error } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: "signup",
+  });
+
+  if (error) {
+    if (error.message.includes("invalid") || error.message.includes("expired")) {
+      return { error: "验证码无效或已过期，请重新获取" };
+    }
+    return { error: error.message };
+  }
+
+  return { success: true as const };
+}
+
 export async function sendResetPasswordClient(email: string) {
   const supabase = createClient();
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/auth/reset-password`,
-  });
+  const { error } = await supabase.auth.resetPasswordForEmail(email);
 
   if (error) {
     if (error.message.includes("rate limit")) {
@@ -87,12 +98,37 @@ export async function sendResetPasswordClient(email: string) {
     return { error: error.message };
   }
 
-  return { success: true, message: "密码重置链接已发送到您的邮箱，请查收并点击链接重置密码" };
+  return { success: true as const };
+}
+
+export async function verifyResetOtpClient(email: string, token: string) {
+  const supabase = createClient();
+
+  const { error } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: "recovery",
+  });
+
+  if (error) {
+    if (error.message.includes("invalid") || error.message.includes("expired")) {
+      return { error: "验证码无效或已过期，请重新获取" };
+    }
+    return { error: error.message };
+  }
+
+  return { success: true as const };
 }
 
 export async function updatePasswordClient(password: string) {
-  if (password.length < 6) {
-    return { error: "密码至少6个字符" };
+  if (password.length < 8) {
+    return { error: "密码至少8个字符" };
+  }
+  if (!/[A-Z]/.test(password)) {
+    return { error: "密码必须包含至少一个大写字母" };
+  }
+  if (!/[a-z]/.test(password)) {
+    return { error: "密码必须包含至少一个小写字母" };
   }
 
   const supabase = createClient();

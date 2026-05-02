@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Flame, X } from "lucide-react";
 import { useState } from "react";
-import { updateStreakFromClient } from "@/lib/supabase/actions";
+import { updateStreakFromClient } from "@/lib/supabase/client-actions";
 import { useUserProgress } from "@/store/use-user-progress";
 import { useCheckinStore } from "@/store/use-checkin";
 

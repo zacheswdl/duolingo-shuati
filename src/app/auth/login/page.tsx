@@ -1,15 +1,32 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2, Eye, EyeOff, LogIn, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { login } from "@/lib/auth-actions";
+import { loginClient } from "@/lib/auth-client";
 import { motion } from "framer-motion";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [state, formAction, pending] = useActionState(login, undefined);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setPending(true);
+    setError(null);
+    const formData = new FormData(e.currentTarget);
+    const result = await loginClient(formData.get("email") as string, formData.get("password") as string);
+    if (result.error) {
+      setError(result.error);
+      setPending(false);
+    } else {
+      router.push("/learn");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -51,10 +68,10 @@ export default function LoginPage() {
           transition={{ delay: 0.3 }}
           className="bg-white rounded-3xl shadow-xl border-2 border-slate-100 p-6 max-w-sm mx-auto"
         >
-          <form action={formAction} className="space-y-4">
-            {state?.error && (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm font-medium">
-                {state.error}
+                {error}
               </div>
             )}
 

@@ -105,7 +105,13 @@ cp .env.example .env.local
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_SITE_URL=https://your-domain.com
 ```
+
+**重要提示**：
+- `NEXT_PUBLIC_SITE_URL` 必须设置为你的实际访问域名（例如：`https://tk.your-domain.com`）
+- 此配置用于 Supabase Auth 的回调链接（邮件确认、密码重置等）
+- 如果不配置，邮件中的链接会指向 `http://localhost:3000`，导致外部用户无法正常使用
 
 ### 数据库初始化
 
@@ -267,7 +273,10 @@ git push origin main
    - 框架预设选择 **Next.js**（自动检测）
    - 构建命令：`npm run build`
    - 输出目录：`.next`
-   - 添加环境变量：`NEXT_PUBLIC_SUPABASE_URL` 和 `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - 添加环境变量：
+     - `NEXT_PUBLIC_SUPABASE_URL`
+     - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+     - `NEXT_PUBLIC_SITE_URL=https://your-custom-domain.com`（替换为你的实际域名）
    - 点击「部署」
 
 4. **绑定自定义域名**

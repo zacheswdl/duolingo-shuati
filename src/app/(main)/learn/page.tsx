@@ -7,7 +7,7 @@ import { Loader2, Book, FileText, CheckCircle, XCircle, Star } from "lucide-reac
 import { Icon, type IconName } from "@/components/Icon";
 import { Button } from "@/components/ui/button";
 import { useUserProgress } from "@/store/use-user-progress";
-import { getChapters, getDailyTasks, getUserStats, getLeaderboard, getUserRank } from "@/lib/supabase/actions";
+import { getChapters, getDailyTasks, getUserStats, getLeaderboard, getUserRank } from "@/lib/supabase/client-actions";
 import { DAILY_TASKS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";

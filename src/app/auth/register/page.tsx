@@ -1,10 +1,10 @@
 "use client";
 
-import { useActionState, useState, useRef, useEffect, useCallback, useTransition } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Loader2, Eye, EyeOff, Mail, CheckCircle, ArrowLeft, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { sendOtp, verifyOtp, resendOtp } from "@/lib/auth-actions";
+import { signUpClient, resendOtpClient } from "@/lib/auth-client";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function RegisterPage() {
@@ -19,19 +19,8 @@ export default function RegisterPage() {
   const timerRef = useRef<number | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
-  const [isSendPending, startSendTransition] = useTransition();
-  const [sendState, sendAction, sendPending] = useActionState(sendOtp, undefined);
-  const [verifyState, verifyAction, verifyPending] = useActionState(verifyOtp, undefined);
-
-  // 发送确认邮件成功后进入确认页面
-  useEffect(() => {
-    if (sendState && "success" in sendState && sendState.success) {
-      setEmail(sendState.email || "");
-      setPassword(sendState.password || "");
-      setStep("confirm");
-      setResendCooldown(60);
-    }
-  }, [sendState]);
+  const [sendPending, setSendPending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
 
   // 倒计时
   useEffect(() => {
@@ -56,7 +45,7 @@ export default function RegisterPage() {
   const handleResend = async () => {
     if (resendCooldown > 0 || !email) return;
     setResendError(null);
-    const result = await resendOtp(email);
+    const result = await resendOtpClient(email);
     if (result.success) {
       setResendCooldown(60);
     } else {
@@ -88,6 +77,7 @@ export default function RegisterPage() {
   const handleFormSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setClientError(null);
+    setSendError(null);
 
     const form = e.currentTarget;
     const formData = new FormData(form);
@@ -101,12 +91,19 @@ export default function RegisterPage() {
       return;
     }
 
-    // 移除 confirmPassword 字段再提交
-    formData.delete("confirmPassword");
-    startSendTransition(() => {
-      sendAction(formData);
-    });
-  }, [sendAction]);
+    setSendPending(true);
+    const result = await signUpClient(emailVal, pwd);
+    if (result.error) {
+      setSendError(result.error);
+      setSendPending(false);
+    } else {
+      setEmail(emailVal);
+      setPassword(pwd);
+      setStep("confirm");
+      setResendCooldown(60);
+      setSendPending(false);
+    }
+  }, []);
 
   // 返回上一步
   const handleBack = () => {
@@ -114,8 +111,7 @@ export default function RegisterPage() {
   };
 
   // 合并显示的错误信息
-  const errorMessage = sendState?.error || verifyState?.error;
-  const isPending = sendPending || verifyPending;
+  const errorMessage = sendError;
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -183,9 +179,9 @@ export default function RegisterPage() {
                 exit={{ opacity: 0, x: 20 }}
                 className="space-y-4"
               >
-                {(sendState?.error || clientError) && (
+                {(sendError || clientError) && (
                   <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm font-medium">
-                    {clientError || sendState?.error}
+                    {clientError || sendError}
                   </div>
                 )}
 

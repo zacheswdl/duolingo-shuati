@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { Icon } from "@/components/Icon";
-import { getLeaderboard, getUserRank } from "@/lib/supabase/actions";
+import { getLeaderboard, getUserRank } from "@/lib/supabase/client-actions";
 import { useUserProgress } from "@/store/use-user-progress";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";

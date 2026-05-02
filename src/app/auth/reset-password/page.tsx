@@ -1,15 +1,33 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Eye, EyeOff, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { updatePassword } from "@/lib/auth-actions";
+import { updatePasswordClient } from "@/lib/auth-client";
 import { motion } from "framer-motion";
 
 export default function ResetPasswordPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [state, formAction, pending] = useActionState(updatePassword, undefined);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setPending(true);
+    setError(null);
+    const formData = new FormData(e.currentTarget);
+    const result = await updatePasswordClient(formData.get("password") as string);
+    if (result.error) {
+      setError(result.error);
+      setPending(false);
+    } else {
+      setSuccess(true);
+      router.push("/learn");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -51,10 +69,10 @@ export default function ResetPasswordPage() {
           transition={{ delay: 0.3 }}
           className="bg-white rounded-3xl shadow-xl border-2 border-slate-100 p-6 max-w-sm mx-auto"
         >
-          <form action={formAction} className="space-y-4">
-            {state?.error && (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm font-medium">
-                {state.error}
+                {error}
               </div>
             )}
 

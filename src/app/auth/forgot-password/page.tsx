@@ -1,15 +1,30 @@
 "use client";
 
-import { useActionState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Loader2, KeyRound, Mail, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { sendResetPassword } from "@/lib/auth-actions";
+import { sendResetPasswordClient } from "@/lib/auth-client";
 import { motion } from "framer-motion";
 
 export default function ForgotPasswordPage() {
-  const [state, formAction, pending] = useActionState(sendResetPassword, undefined);
-  const isSuccess = state && "success" in state && state.success;
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setPending(true);
+    setError(null);
+    const formData = new FormData(e.currentTarget);
+    const result = await sendResetPasswordClient(formData.get("email") as string);
+    if (result.error) {
+      setError(result.error);
+      setPending(false);
+    } else {
+      setIsSuccess(true);
+    }
+  };
 
   // 发送成功后显示提示页面
   if (isSuccess) {
@@ -118,10 +133,10 @@ export default function ForgotPasswordPage() {
           transition={{ delay: 0.3 }}
           className="bg-white rounded-3xl shadow-xl border-2 border-slate-100 p-6 max-w-sm mx-auto"
         >
-          <form action={formAction} className="space-y-4">
-            {state?.error && (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm font-medium">
-                {state.error}
+                {error}
               </div>
             )}
 

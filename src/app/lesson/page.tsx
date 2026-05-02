@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Quiz } from "./quiz";
-import { getQuestions } from "@/lib/supabase/actions";
+import { getQuestions } from "@/lib/supabase/client-actions";
 import type { Question } from "@/lib/types";
 import { Loader2 } from "lucide-react";
 

@@ -7,8 +7,8 @@ import { Loader2 } from "lucide-react";
 import { Icon, type IconName } from "@/components/Icon";
 import { Button } from "@/components/ui/button";
 import { useUserProgress } from "@/store/use-user-progress";
-import { signOut } from "@/lib/auth-actions";
-import { claimDailyTaskReward, getUserAchievements, getDailyTasks } from "@/lib/supabase/actions";
+import { signOutClient } from "@/lib/auth-client";
+import { claimDailyTaskReward, getUserAchievements, getDailyTasks } from "@/lib/supabase/client-actions";
 import { ACHIEVEMENTS, DAILY_TASKS, DAILY_TASK_REWARD_XP, DAILY_TASK_REWARD_XP_QUESTIONS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -60,7 +60,13 @@ export default function ProfilePage() {
 
   const handleSignOut = async () => {
     setSigningOut(true);
-    await signOut();
+    const result = await signOutClient();
+    if (result.error) {
+      console.error("Sign out failed:", result.error);
+      setSigningOut(false);
+    } else {
+      router.push("/auth/login");
+    }
   };
 
   const handleClaimTask = async (taskId: number) => {

@@ -35,16 +35,21 @@ export async function middleware(request: NextRequest) {
     const authPaths = ["/auth/login", "/auth/register", "/auth/forgot-password", "/auth/reset-password", "/auth/callback"];
 
     if (user && authPaths.includes(pathname)) {
-      return NextResponse.redirect(new URL("/learn", request.url));
+      const response = NextResponse.redirect(new URL("/learn", request.url));
+      response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+      return response;
     }
 
     const protectedPaths = ["/", "/learn", "/exam", "/mistakes", "/profile", "/lesson", "/admin", "/leaderboard", "/favorites"];
     const isProtected = protectedPaths.some((p) => pathname === p || pathname.startsWith(p + "/"));
 
     if (!user && isProtected) {
-      return NextResponse.redirect(new URL("/auth/login", request.url));
+      const response = NextResponse.redirect(new URL("/auth/login", request.url));
+      response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+      return response;
     }
 
+    supabaseResponse.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
     return supabaseResponse;
   } catch {
     const { pathname } = request.nextUrl;
@@ -52,10 +57,14 @@ export async function middleware(request: NextRequest) {
     const isProtected = protectedPaths.some((p) => pathname === p || pathname.startsWith(p + "/"));
 
     if (isProtected) {
-      return NextResponse.redirect(new URL("/auth/login", request.url));
+      const response = NextResponse.redirect(new URL("/auth/login", request.url));
+      response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+      return response;
     }
 
-    return NextResponse.next();
+    const response = NextResponse.next();
+    response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    return response;
   }
 }
 

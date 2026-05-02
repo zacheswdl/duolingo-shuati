@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { Icon } from "@/components/Icon";
 import { useState } from "react";
 import { DAILY_TASKS, DAILY_TASK_REWARD_XP } from "@/lib/constants";
-import { claimDailyTaskReward } from "@/lib/supabase/actions";
+import { claimDailyTaskReward } from "@/lib/supabase/client-actions";
 import type { UserDailyTask } from "@/lib/types";
 
 type Props = {

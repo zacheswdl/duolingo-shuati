@@ -10,7 +10,7 @@ import { Quiz } from "@/app/lesson/quiz";
 import { useUserProgress } from "@/store/use-user-progress";
 import { cn } from "@/lib/utils";
 import type { Question } from "@/lib/types";
-import { getMistakes } from "@/lib/supabase/actions";
+import { getMistakes } from "@/lib/supabase/client-actions";
 
 export default function MistakesPage() {
   const router = useRouter();

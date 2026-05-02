@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Quiz } from "@/app/lesson/quiz";
 import { EXAM_QUESTION_COUNT, EXAM_TIME_MINUTES, PASS_SCORE, EXAM_PASS_BONUS_XP, XP_PER_CORRECT } from "@/lib/constants";
 import { useUserProgress } from "@/store/use-user-progress";
-import { addXp, updateStreak, checkAndUnlockAchievements, updateDailyTaskProgress, updateMaxExamScore } from "@/lib/supabase/actions";
+import { addXp, updateStreak, checkAndUnlockAchievements, updateDailyTaskProgress, updateMaxExamScore } from "@/lib/supabase/client-actions";
 import { AchievementModal } from "@/components/modals/achievement-modal";
 import { DailyTaskModal } from "@/components/modals/daily-task-modal";
 import type { Question, UserDailyTask } from "@/lib/types";
@@ -71,7 +71,7 @@ export default function ExamPage() {
       }
 
       // 检查每日任务完成情况
-      const { getDailyTasks } = await import("@/lib/supabase/actions");
+      const { getDailyTasks } = await import("@/lib/supabase/client-actions");
       const tasks = await getDailyTasks();
       const completed = tasks.filter((t: any) => t.completed && !t.claimed);
       if (completed.length > 0) {

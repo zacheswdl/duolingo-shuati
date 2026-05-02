@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useUserProgress } from "@/store/use-user-progress";
 import { createClient } from "@/lib/supabase/client";
-import { resetHeartsIfNewDay } from "@/lib/supabase/actions";
+import { resetHeartsIfNewDay } from "@/lib/supabase/client-actions";
 
 export const ProgressHydrator = () => {
   const { hydrate, setLoading } = useUserProgress();

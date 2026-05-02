@@ -8,7 +8,7 @@ import { Icon } from "@/components/Icon";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Question } from "@/lib/types";
-import { getFavorites, removeFavorite } from "@/lib/supabase/actions";
+import { getFavorites, removeFavorite } from "@/lib/supabase/client-actions";
 import { toast } from "sonner";
 
 export default function FavoritesPage() {

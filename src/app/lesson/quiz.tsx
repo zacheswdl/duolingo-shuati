@@ -14,7 +14,7 @@ import { useCheckinStore } from "@/store/use-checkin";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { XP_PER_CORRECT, HEARTS_MAX } from "@/lib/constants";
-import { addXp as addXpToServer, recordAnswer, updateDailyTaskProgress, checkAndUnlockAchievements, toggleFavorite, removeHeart as removeHeartServer, addHeart as addHeartServer, refreshUserProgress } from "@/lib/supabase/actions";
+import { addXp as addXpToServer, recordAnswer, updateDailyTaskProgress, checkAndUnlockAchievements, toggleFavorite, removeHeart as removeHeartServer, addHeart as addHeartServer, refreshUserProgress } from "@/lib/supabase/client-actions";
 import { AchievementModal } from "@/components/modals/achievement-modal";
 import { DailyTaskModal } from "@/components/modals/daily-task-modal";
 import { CheckinModal } from "@/components/modals/checkin-modal";
@@ -292,7 +292,7 @@ export const Quiz = ({
           setTimeout(() => setShowAchievementModal(true), 500);
         }
 
-        const { getDailyTasks } = await import("@/lib/supabase/actions");
+        const { getDailyTasks } = await import("@/lib/supabase/client-actions");
         const tasks = await getDailyTasks();
         const completed = tasks.filter((t: any) => t.completed && !t.claimed);
         if (completed.length > 0) {

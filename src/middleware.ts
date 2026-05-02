@@ -2,52 +2,61 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request });
+  try {
+    let supabaseResponse = NextResponse.next({ request });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value }) =>
+              request.cookies.set(name, value)
+            );
+            supabaseResponse = NextResponse.next({ request });
+            cookiesToSet.forEach(({ name, value, options }) =>
+              supabaseResponse.cookies.set(name, value, options)
+            );
+          },
         },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
-          supabaseResponse = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
-        },
-      },
+      }
+    );
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const { pathname } = request.nextUrl;
+
+    const authPaths = ["/auth/login", "/auth/register", "/auth/forgot-password", "/auth/reset-password", "/auth/callback"];
+
+    if (user && authPaths.includes(pathname)) {
+      return NextResponse.redirect(new URL("/learn", request.url));
     }
-  );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    const protectedPaths = ["/", "/learn", "/exam", "/mistakes", "/profile", "/lesson", "/admin", "/leaderboard", "/favorites"];
+    const isProtected = protectedPaths.some((p) => pathname === p || pathname.startsWith(p + "/"));
 
-  const { pathname } = request.nextUrl;
+    if (!user && isProtected) {
+      return NextResponse.redirect(new URL("/auth/login", request.url));
+    }
 
-  // 认证相关路径
-  const authPaths = ["/auth/login", "/auth/register", "/auth/forgot-password", "/auth/reset-password", "/auth/callback"];
+    return supabaseResponse;
+  } catch {
+    const { pathname } = request.nextUrl;
+    const protectedPaths = ["/", "/learn", "/exam", "/mistakes", "/profile", "/lesson", "/admin", "/leaderboard", "/favorites"];
+    const isProtected = protectedPaths.some((p) => pathname === p || pathname.startsWith(p + "/"));
 
-  // 如果用户已登录，访问登录/注册页面时重定向到 /learn
-  if (user && authPaths.includes(pathname)) {
-    return NextResponse.redirect(new URL("/learn", request.url));
+    if (isProtected) {
+      return NextResponse.redirect(new URL("/auth/login", request.url));
+    }
+
+    return NextResponse.next();
   }
-
-  // 如果用户未登录，访问需要登录的页面时重定向到 /auth/login
-  const protectedPaths = ["/learn", "/exam", "/mistakes", "/profile", "/lesson", "/admin"];
-  const isProtected = protectedPaths.some((p) => pathname === p || pathname.startsWith(p + "/"));
-
-  if (!user && isProtected) {
-    return NextResponse.redirect(new URL("/auth/login", request.url));
-  }
-
-  return supabaseResponse;
 }
 
 export const config = {

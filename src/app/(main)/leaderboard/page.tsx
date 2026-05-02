@@ -130,45 +130,48 @@ export default function LeaderboardPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.03 }}
               className={cn(
-                "flex items-center gap-4 p-4 rounded-2xl border-2 transition-all",
+                "flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-4 rounded-2xl border-2 transition-all",
                 getRankBg(entry.rank)
               )}
             >
-              {/* Rank */}
-              <div className="w-10 h-10 flex items-center justify-center shrink-0">
-                {getRankIcon(entry.rank) || (
-                  <span className="text-lg font-bold text-slate-400">
-                    #{entry.rank}
-                  </span>
-                )}
-              </div>
+              {/* Rank + Avatar row */}
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                {/* Rank */}
+                <div className="w-10 h-10 flex items-center justify-center shrink-0">
+                  {getRankIcon(entry.rank) || (
+                    <span className="text-lg font-bold text-slate-400">
+                      #{entry.rank}
+                    </span>
+                  )}
+                </div>
 
-              {/* Avatar */}
-              <div className="w-12 h-12 bg-gradient-to-br from-[#58cc02] to-[#4aad02] rounded-xl flex items-center justify-center text-white font-bold text-lg shrink-0">
-                {String.fromCharCode(65 + (entry.rank - 1) % 26)}
+                {/* Avatar */}
+                <div className="w-12 h-12 bg-gradient-to-br from-[#58cc02] to-[#4aad02] rounded-xl flex items-center justify-center text-white font-bold text-lg shrink-0">
+                  {String.fromCharCode(65 + (entry.rank - 1) % 26)}
+                </div>
               </div>
 
               {/* Info */}
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 w-full">
                 <p className="font-bold text-slate-700 truncate">
                   {entry.display_name || (entry.user_id === currentUserId ? currentDisplayName : `用户${entry.user_id.slice(0, 6)}`)}
                 </p>
-                <div className="flex items-center gap-2 text-sm flex-wrap mt-1">
-                  <span className="inline-flex items-center gap-1 rounded-xl bg-orange-50 border border-orange-100 px-2.5 py-1 text-orange-500 font-semibold">
-                    <Icon name="flame" size={20} />
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  <span className="inline-flex items-center gap-1 rounded-xl bg-orange-50 border border-orange-100 px-2.5 py-1 text-orange-500 font-semibold text-xs sm:text-sm">
+                    <Icon name="flame" size={16} />
                     连续打卡 {entry.streak} 天
                   </span>
-                  <span className="inline-flex items-center gap-1 rounded-xl bg-sky-50 border border-sky-100 px-2.5 py-1 text-sky-600 font-semibold">
-                    <Icon name="target" size={20} />
+                  <span className="inline-flex items-center gap-1 rounded-xl bg-sky-50 border border-sky-100 px-2.5 py-1 text-sky-600 font-semibold text-xs sm:text-sm">
+                    <Icon name="target" size={16} />
                     模拟考试最高分 {entry.max_exam_score ?? 0}
                   </span>
                 </div>
               </div>
 
               {/* XP */}
-              <div className="shrink-0">
+              <div className="shrink-0 w-full sm:w-auto flex justify-start sm:justify-end">
                 <div className="inline-flex items-center gap-1 rounded-xl bg-amber-50 border border-amber-100 px-3 py-1.5">
-                  <Icon name="star" size={24} />
+                  <Icon name="star" size={20} />
                   <span className="font-bold text-amber-600">{entry.xp.toLocaleString()} XP</span>
                 </div>
               </div>

@@ -1,0 +1,54 @@
+@import '@/styles/variables.scss';
+
+.achievement-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-sm 0;
+}
+
+.achievement-modal-icon {
+  font-size: 80px;
+  margin-bottom: $spacing-base;
+}
+
+.achievement-modal-label {
+  font-size: $font-size-sm;
+  font-weight: 700;
+  color: $color-gold;
+  text-transform: uppercase;
+  margin-bottom: $spacing-xs;
+}
+
+.achievement-modal-name {
+  font-size: $font-size-xl;
+  font-weight: 700;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.achievement-modal-desc {
+  font-size: $font-size-base;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-lg;
+  text-align: center;
+}
+
+.achievement-modal-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background-color: $color-primary;
+  color: #ffffff;
+  font-size: $font-size-base;
+  font-weight: 700;
+  border-radius: $border-radius-base;
+  padding: 24px 0;
+  box-shadow: 0 4px 0 $color-primary-dark;
+
+  &:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 $color-primary-dark;
+  }
+}

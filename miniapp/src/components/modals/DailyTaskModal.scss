@@ -1,0 +1,61 @@
+@import '@/styles/variables.scss';
+
+.daily-task-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-sm 0;
+}
+
+.daily-task-modal-icon {
+  font-size: 80px;
+  margin-bottom: $spacing-base;
+}
+
+.daily-task-modal-title {
+  font-size: $font-size-xl;
+  font-weight: 700;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.daily-task-modal-task {
+  font-size: $font-size-base;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+}
+
+.daily-task-modal-reward {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #FFF8E1;
+  border-radius: $border-radius-base;
+  padding: $spacing-xs $spacing-base;
+  margin-bottom: $spacing-lg;
+}
+
+.daily-task-modal-reward-text {
+  font-size: $font-size-lg;
+  font-weight: 700;
+  color: $color-warning;
+}
+
+.daily-task-modal-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background-color: $color-primary;
+  color: #ffffff;
+  font-size: $font-size-base;
+  font-weight: 700;
+  border-radius: $border-radius-base;
+  padding: 24px 0;
+  box-shadow: 0 4px 0 $color-primary-dark;
+
+  &:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 $color-primary-dark;
+  }
+}

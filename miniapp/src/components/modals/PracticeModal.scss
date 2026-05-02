@@ -1,0 +1,69 @@
+@import '@/styles/variables.scss';
+
+.practice-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-sm 0;
+}
+
+.practice-modal-icon {
+  font-size: 80px;
+  margin-bottom: $spacing-base;
+}
+
+.practice-modal-chapter {
+  font-size: $font-size-xl;
+  font-weight: 700;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.practice-modal-count {
+  font-size: $font-size-base;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-lg;
+}
+
+.practice-modal-actions {
+  display: flex;
+  width: 100%;
+  gap: $spacing-sm;
+}
+
+.practice-modal-btn-outline {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  color: $color-text-secondary;
+  font-size: $font-size-base;
+  font-weight: 700;
+  border-radius: $border-radius-base;
+  padding: 24px 0;
+  border: 2px solid $color-border;
+
+  &:active {
+    background-color: $color-bg;
+  }
+}
+
+.practice-modal-btn-primary {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $color-primary;
+  color: #ffffff;
+  font-size: $font-size-base;
+  font-weight: 700;
+  border-radius: $border-radius-base;
+  padding: 24px 0;
+  box-shadow: 0 4px 0 $color-primary-dark;
+
+  &:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 $color-primary-dark;
+  }
+}

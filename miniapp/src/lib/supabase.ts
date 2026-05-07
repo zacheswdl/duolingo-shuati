@@ -5,10 +5,11 @@ import { getSupabaseUrl, getSupabaseAnonKey } from './config';
 type SupabaseClient = ReturnType<typeof createClient>;
 
 type MiniappGlobal = typeof globalThis & {
+  wx?: MiniappGlobal;
   __duolingoShuatiSupabase?: SupabaseClient;
 };
 
-const miniappGlobal = globalThis as MiniappGlobal;
+const miniappGlobal = ((globalThis as MiniappGlobal).wx || globalThis) as MiniappGlobal;
 
 export function getSupabaseClient() {
   if (!miniappGlobal.__duolingoShuatiSupabase) {

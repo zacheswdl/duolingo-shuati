@@ -1,10 +1,10 @@
 export default defineAppConfig({
   pages: [
+    'pages/login/index',
     'pages/index/index',
     'pages/exam/index',
     'pages/mistakes/index',
     'pages/profile/index',
-    'pages/login/index',
     'pages/lesson/index',
     'pages/exam/result/index',
     'pages/favorites/index',

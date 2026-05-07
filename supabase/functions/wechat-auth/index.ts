@@ -26,8 +26,8 @@ function getRequiredEnv(primary: string, fallback?: string) {
   return value
 }
 
-function createLoginPassword(openid: string, sessionKey = '') {
-  const seed = `${openid}:${sessionKey}:${crypto.randomUUID()}`
+function createLoginPassword(openid: string, secret: string) {
+  const seed = `${openid}:${secret}`
   return `Wx_${btoa(seed).replace(/[^a-zA-Z0-9]/g, '').slice(0, 40)}_9a!`
 }
 
@@ -40,19 +40,6 @@ function isMissingWechatUsersTable(error: { message?: string; code?: string } | 
   return error?.code === '42P01' || /wechat_users|relation .* does not exist/i.test(error?.message || '')
 }
 
-async function findUserIdFromAuthMetadata(admin: ReturnType<typeof createClient>, openid: string) {
-  for (let page = 1; page <= 20; page += 1) {
-    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 100 })
-    if (error) throw error
-
-    const user = data.users.find((item) => item.user_metadata?.wechat_openid === openid)
-    if (user) return user.id
-    if (data.users.length < 100) break
-  }
-
-  return undefined
-}
-
 async function findLinkedUserId(admin: ReturnType<typeof createClient>, openid: string) {
   const { data: existingLink, error } = await admin
     .from('wechat_users')
@@ -61,25 +48,22 @@ async function findLinkedUserId(admin: ReturnType<typeof createClient>, openid: 
     .maybeSingle()
 
   if (!error) {
-    return { userId: existingLink?.user_id as string | undefined, tableAvailable: true }
+    return existingLink?.user_id as string | undefined
   }
 
-  if (!isMissingWechatUsersTable(error)) {
-    throw error
+  if (isMissingWechatUsersTable(error)) {
+    throw new Error('wechat_users table is missing. Run supabase/functions/wechat-auth/migration.sql in Supabase SQL editor.')
   }
 
-  const userId = await findUserIdFromAuthMetadata(admin, openid)
-  return { userId, tableAvailable: false }
+  throw error
 }
 
-async function linkWechatUser(admin: ReturnType<typeof createClient>, openid: string, userId: string, tableAvailable: boolean) {
-  if (!tableAvailable) return
-
+async function linkWechatUser(admin: ReturnType<typeof createClient>, openid: string, userId: string) {
   const { error } = await admin
     .from('wechat_users')
     .upsert({ openid, user_id: userId }, { onConflict: 'openid' })
 
-  if (error && !isMissingWechatUsersTable(error)) {
+  if (error) {
     throw error
   }
 }
@@ -126,15 +110,14 @@ Deno.serve(async (req) => {
     const email = createWechatEmail(openid)
 
     stage = 'find-linked-user'
-    const { userId: linkedUserId, tableAvailable } = await findLinkedUserId(admin, openid)
-    let userId = linkedUserId
+    let userId = await findLinkedUserId(admin, openid)
+    const loginPassword = createLoginPassword(openid, SUPABASE_SERVICE_ROLE_KEY)
 
     if (!userId) {
       stage = 'create-auth-user'
-      const initialPassword = createLoginPassword(openid, wechatData.session_key)
       const { data: created, error: createError } = await admin.auth.admin.createUser({
         email,
-        password: initialPassword,
+        password: loginPassword,
         email_confirm: true,
         user_metadata: { wechat_openid: openid },
       })
@@ -147,10 +130,9 @@ Deno.serve(async (req) => {
     }
 
     stage = 'link-wechat-user'
-    await linkWechatUser(admin, openid, userId, tableAvailable)
+    await linkWechatUser(admin, openid, userId)
 
     stage = 'prepare-login-session'
-    const loginPassword = createLoginPassword(openid, wechatData.session_key)
     const { error: updateError } = await admin.auth.admin.updateUserById(userId, {
       email,
       password: loginPassword,
@@ -179,7 +161,6 @@ Deno.serve(async (req) => {
       access_token: sessionData.session.access_token,
       refresh_token: sessionData.session.refresh_token,
       user_id: userId,
-      table_available: tableAvailable,
     })
   } catch (err) {
     return errorResponse(stage, err)

@@ -4,10 +4,20 @@ import { getSupabaseClient } from './supabase';
 
 const TOKEN_KEY = 'sb-access-token';
 const REFRESH_TOKEN_KEY = 'sb-refresh-token';
+const LOGIN_TIMEOUT_MS = 10000;
+const AUTH_REQUEST_TIMEOUT_MS = 20000;
+
+function formatLoginError(err: any) {
+  const message = String(err?.errMsg || err?.message || err || '登录异常');
+  if (/timeout/i.test(message)) {
+    return '登录请求超时，请检查网络后重试';
+  }
+  return message;
+}
 
 export async function wxLogin(): Promise<{ success: boolean; error?: string; userId?: string }> {
   try {
-    const { code } = await Taro.login();
+    const { code } = await Taro.login({ timeout: LOGIN_TIMEOUT_MS });
     if (!code) {
       return { success: false, error: '微信登录失败' };
     }
@@ -16,6 +26,7 @@ export async function wxLogin(): Promise<{ success: boolean; error?: string; use
     const res = await Taro.request({
       url: getAuthUrl(),
       method: 'POST',
+      timeout: AUTH_REQUEST_TIMEOUT_MS,
       header: {
         apikey: anonKey,
         Authorization: `Bearer ${anonKey}`,
@@ -53,7 +64,9 @@ export async function wxLogin(): Promise<{ success: boolean; error?: string; use
 
     return { success: true, userId };
   } catch (err: any) {
-    return { success: false, error: err.message || '登录异常' };
+    const error = formatLoginError(err);
+    console.error('[wxLogin] login exception', { error, raw: err });
+    return { success: false, error };
   }
 }
 

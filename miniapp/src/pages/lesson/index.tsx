@@ -12,6 +12,8 @@ import {
 } from '@/lib/actions';
 import { HEARTS_MAX, XP_PER_CORRECT, EXAM_TIME_MINUTES } from '@/lib/constants';
 import { useUserProgressStore } from '@/store/user-progress';
+import HeartsModal from '@/components/modals/HeartsModal';
+import ExitModal from '@/components/modals/ExitModal';
 import type { Question } from '@/lib/types';
 import './index.scss';
 
@@ -129,7 +131,17 @@ export default function LessonPage() {
 
   const handleOptionClick = (key: string) => {
     if (isAnswered && mode !== 'exam') return;
+
     if (mode === 'exam') {
+      if (currentQuestion?.type === 'multiple') {
+        setExamAnswers(prev => {
+          const selected = prev[currentIndex] ? prev[currentIndex].split(',').filter(Boolean) : [];
+          const next = selected.includes(key) ? selected.filter(item => item !== key) : [...selected, key];
+          return { ...prev, [currentIndex]: next.sort().join(',') };
+        });
+        return;
+      }
+
       setExamAnswers(prev => ({ ...prev, [currentIndex]: key }));
       return;
     }
@@ -189,6 +201,13 @@ export default function LessonPage() {
     }
   };
 
+  const resetAnswerState = () => {
+    setSelectedOptions([]);
+    setIsAnswered(false);
+    setIsCorrect(false);
+    setIsFavorite(false);
+  };
+
   const handleNext = () => {
     if (currentIndex >= questions.length - 1) {
       if (mode === 'chapter' || mode === 'recovery' || mode === 'favorites') {
@@ -200,10 +219,13 @@ export default function LessonPage() {
     }
 
     setCurrentIndex(prev => prev + 1);
-    setSelectedOptions([]);
-    setIsAnswered(false);
-    setIsCorrect(false);
-    setIsFavorite(false);
+    resetAnswerState();
+  };
+
+  const handlePrevious = () => {
+    if (currentIndex <= 0) return;
+    setCurrentIndex(prev => prev - 1);
+    resetAnswerState();
   };
 
   const handleExamSubmit = () => {
@@ -262,7 +284,8 @@ export default function LessonPage() {
   const getOptionClass = (key: string) => {
     let cls = 'option-item';
     if (mode === 'exam') {
-      if (examAnswers[currentIndex] === key) cls += ' selected';
+      const answer = examAnswers[currentIndex];
+      if (answer?.split(',').filter(Boolean).includes(key)) cls += ' selected';
     } else {
       if (!isAnswered && selectedOptions.includes(key)) cls += ' selected';
       if (isAnswered) {
@@ -348,6 +371,11 @@ export default function LessonPage() {
       </View>
 
       <View className='lesson-footer'>
+        {mode === 'exam' && (
+          <View className={`btn-secondary ${currentIndex === 0 ? 'disabled' : ''}`} onClick={handlePrevious}>
+            <Text>上一题</Text>
+          </View>
+        )}
         {mode === 'exam' ? (
           currentIndex === questions.length - 1 ? (
             <View className='btn-primary' onClick={handleExamSubmit}>
@@ -369,38 +397,8 @@ export default function LessonPage() {
         )}
       </View>
 
-      {showHeartsModal && (
-        <View className='hearts-modal'>
-          <View className='modal-content'>
-            <Text className='modal-icon'>💔</Text>
-            <Text className='modal-title'>生命值耗尽</Text>
-            <Text className='modal-desc'>明天生命值将恢复满，继续加油！</Text>
-            <View className='modal-actions'>
-              <View className='btn-primary' onClick={confirmExit}>
-                <Text>返回</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
-
-      {showExitModal && (
-        <View className='exit-modal'>
-          <View className='modal-content'>
-            <Text className='modal-icon'>🚪</Text>
-            <Text className='modal-title'>确定退出？</Text>
-            <Text className='modal-desc'>退出后当前进度将不会保存</Text>
-            <View className='modal-actions'>
-              <View className='btn-danger' onClick={confirmExit}>
-                <Text>确定退出</Text>
-              </View>
-              <View className='btn-outline' onClick={() => setShowExitModal(false)}>
-                <Text>继续答题</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
+      <HeartsModal visible={showHeartsModal} hearts={hearts} onClose={confirmExit} />
+      <ExitModal visible={showExitModal} onConfirm={confirmExit} onCancel={() => setShowExitModal(false)} />
     </View>
   );
 }

@@ -2,12 +2,19 @@ import { createClient } from '@supabase/supabase-js';
 import Taro from '@tarojs/taro';
 import { getSupabaseUrl, getSupabaseAnonKey } from './config';
 
-let supabaseInstance: ReturnType<typeof createClient> | null = null;
+type SupabaseClient = ReturnType<typeof createClient>;
+
+type MiniappGlobal = typeof globalThis & {
+  __duolingoShuatiSupabase?: SupabaseClient;
+};
+
+const miniappGlobal = globalThis as MiniappGlobal;
 
 export function getSupabaseClient() {
-  if (!supabaseInstance) {
-    supabaseInstance = createClient(getSupabaseUrl(), getSupabaseAnonKey(), {
+  if (!miniappGlobal.__duolingoShuatiSupabase) {
+    miniappGlobal.__duolingoShuatiSupabase = createClient(getSupabaseUrl(), getSupabaseAnonKey(), {
       auth: {
+        storageKey: 'duolingo-shuati-auth-token',
         storage: {
           getItem: (key: string) => {
             return Promise.resolve(Taro.getStorageSync(key) || null);
@@ -27,5 +34,5 @@ export function getSupabaseClient() {
       },
     });
   }
-  return supabaseInstance;
+  return miniappGlobal.__duolingoShuatiSupabase;
 }

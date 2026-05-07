@@ -197,103 +197,33 @@
     padding: $spacing-base;
     background-color: $color-bg-white;
     box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
+    display: flex;
+    gap: $spacing-sm;
 
     .btn-primary {
-      width: 100%;
+      flex: 1;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #ffffff;
+      color: $color-text-secondary;
+      font-size: $font-size-base;
+      font-weight: 700;
+      border-radius: $border-radius-base;
+      padding: 24px 0;
+      border: 2px solid $color-border;
+
+      &.disabled {
+        opacity: 0.45;
+      }
     }
 
     .btn-danger {
-      width: 100%;
-    }
-  }
-
-  .hearts-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
-
-    .modal-content {
-      width: 80%;
-      background-color: $color-bg-white;
-      border-radius: $border-radius-lg;
-      padding: $spacing-xl $spacing-base;
-      text-align: center;
-
-      .modal-icon {
-        font-size: 80px;
-        margin-bottom: $spacing-base;
-      }
-
-      .modal-title {
-        font-size: $font-size-xl;
-        font-weight: 700;
-        color: $color-text-primary;
-        margin-bottom: $spacing-sm;
-      }
-
-      .modal-desc {
-        font-size: $font-size-base;
-        color: $color-text-secondary;
-        margin-bottom: $spacing-lg;
-      }
-
-      .modal-actions {
-        .btn-primary {
-          margin-bottom: $spacing-sm;
-        }
-      }
-    }
-  }
-
-  .exit-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
-
-    .modal-content {
-      width: 80%;
-      background-color: $color-bg-white;
-      border-radius: $border-radius-lg;
-      padding: $spacing-xl $spacing-base;
-      text-align: center;
-
-      .modal-icon {
-        font-size: 80px;
-        margin-bottom: $spacing-base;
-      }
-
-      .modal-title {
-        font-size: $font-size-xl;
-        font-weight: 700;
-        color: $color-text-primary;
-        margin-bottom: $spacing-sm;
-      }
-
-      .modal-desc {
-        font-size: $font-size-base;
-        color: $color-text-secondary;
-        margin-bottom: $spacing-lg;
-      }
-
-      .modal-actions {
-        .btn-danger {
-          margin-bottom: $spacing-sm;
-        }
-      }
+      flex: 1;
     }
   }
 }

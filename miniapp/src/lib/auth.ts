@@ -5,7 +5,7 @@ import { getSupabaseClient } from './supabase';
 const TOKEN_KEY = 'sb-access-token';
 const REFRESH_TOKEN_KEY = 'sb-refresh-token';
 
-export async function wxLogin(): Promise<{ success: boolean; error?: string }> {
+export async function wxLogin(): Promise<{ success: boolean; error?: string; userId?: string }> {
   try {
     const { code } = await Taro.login();
     if (!code) {
@@ -27,32 +27,37 @@ export async function wxLogin(): Promise<{ success: boolean; error?: string }> {
     Taro.setStorageSync(REFRESH_TOKEN_KEY, refresh_token);
 
     const supabase = getSupabaseClient();
-    await supabase.auth.setSession({
+    const { data: sessionData } = await supabase.auth.setSession({
       access_token,
       refresh_token,
     });
 
-    return { success: true };
+    const userId = sessionData.session?.user.id;
+    if (!userId) {
+      const { data: { user } } = await supabase.auth.getUser();
+      return { success: true, userId: user?.id };
+    }
+
+    return { success: true, userId };
   } catch (err: any) {
     return { success: false, error: err.message || '登录异常' };
   }
 }
 
-export async function silentLogin(): Promise<boolean> {
+export async function silentLogin(): Promise<{ success: boolean; userId?: string }> {
   const token = Taro.getStorageSync(TOKEN_KEY);
-  if (!token) return false;
+  if (!token) return { success: false };
 
   try {
     const supabase = getSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (user) return true;
+    if (user) return { success: true, userId: user.id };
   } catch {
-    // token invalid, try refresh
   }
 
   try {
     const refreshToken = Taro.getStorageSync(REFRESH_TOKEN_KEY);
-    if (!refreshToken) return false;
+    if (!refreshToken) return { success: false };
 
     const supabase = getSupabaseClient();
     const { data, error } = await supabase.auth.refreshSession({
@@ -61,15 +66,15 @@ export async function silentLogin(): Promise<boolean> {
 
     if (error || !data.session) {
       clearAuth();
-      return false;
+      return { success: false };
     }
 
     Taro.setStorageSync(TOKEN_KEY, data.session.access_token);
     Taro.setStorageSync(REFRESH_TOKEN_KEY, data.session.refresh_token);
-    return true;
+    return { success: true, userId: data.session.user.id };
   } catch {
     clearAuth();
-    return false;
+    return { success: false };
   }
 }
 

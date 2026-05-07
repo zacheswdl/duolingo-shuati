@@ -16,8 +16,8 @@ export default function LoginPage() {
     try {
       const result = await wxLogin();
       Taro.hideLoading();
-      if (result.success) {
-        setLoggedIn('');
+      if (result.success && result.userId) {
+        setLoggedIn(result.userId);
         Taro.switchTab({ url: '/pages/index/index' });
       } else {
         Taro.showToast({ title: result.error || '登录失败', icon: 'none' });

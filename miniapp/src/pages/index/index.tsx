@@ -3,8 +3,28 @@ import { View, Text, ScrollView, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { getUserStats, getChapters, getLeaderboard, getDailyTasks, getUserProgress } from '@/lib/actions';
 import { DAILY_TASKS } from '@/lib/constants';
-import type { Question, LeaderboardEntry, UserDailyTask } from '@/lib/types';
+import type { LeaderboardEntry, UserDailyTask } from '@/lib/types';
+import bookIcon from '@/assets/icons/book.png';
+import checkCircleIcon from '@/assets/icons/check-circle.png';
+import crownIcon from '@/assets/icons/crown.png';
+import fileXIcon from '@/assets/icons/file-x.png';
+import flameIcon from '@/assets/icons/flame.png';
+import giftIcon from '@/assets/icons/gift.png';
+import medalIcon from '@/assets/icons/medal.png';
+import penIcon from '@/assets/icons/pen.png';
+import starIcon from '@/assets/icons/star.png';
+import targetIcon from '@/assets/icons/target.png';
+import trophyIcon from '@/assets/icons/trophy.png';
+import xCircleIcon from '@/assets/icons/x-circle.png';
 import './index.scss';
+
+const iconMap: Record<string, string> = {
+  BookOpen: bookIcon,
+  PenTool: penIcon,
+  Target: targetIcon,
+  Trophy: trophyIcon,
+  book: bookIcon,
+};
 
 const chapterNameMap: Record<string, string> = {
   chapter_judge: '判断题',
@@ -19,12 +39,10 @@ const getChapterDisplayName = (chapter: string): string => {
 export default function IndexPage() {
   const [stats, setStats] = useState({ totalQuestions: 0, practiced: 0, mistakes: 0, favorites: 0 });
   const [chapters, setChapters] = useState<string[]>([]);
-  const [chapterQuestions, setChapterQuestions] = useState<Record<string, Question[]>>({});
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [dailyTasks, setDailyTasks] = useState<UserDailyTask[]>([]);
   const [userProgress, setUserProgress] = useState<{ hearts: number; xp: number; streak: number } | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string>('');
-  const [myRankEntry, setMyRankEntry] = useState<LeaderboardEntry | null>(null);
   const [showAllLeaderboard, setShowAllLeaderboard] = useState(false);
 
   const loadData = useCallback(async () => {
@@ -99,7 +117,7 @@ export default function IndexPage() {
 
   const getMyRank = () => {
     const entry = leaderboard.find((e) => e.user_id === currentUserId);
-    return entry?.rank || myRankEntry?.rank || '?';
+    return entry?.rank || '?';
   };
 
   return (
@@ -108,7 +126,7 @@ export default function IndexPage() {
         <View className='header-card'>
           <View className='header-content'>
             <View className='header-icon'>
-              <Image src='../../assets/icons/book.png' className='icon-img' mode='aspectFit' />
+              <Image src={bookIcon} className='icon-img' mode='aspectFit' />
             </View>
             <View className='header-text'>
               <Text className='header-title'>学习是你自己该偷着去做的自私行为</Text>
@@ -120,7 +138,7 @@ export default function IndexPage() {
         <View className='card leaderboard-card'>
           <View className='section-header'>
             <View className='section-title-wrapper'>
-              <Image src='../../assets/icons/trophy.png' className='section-icon' mode='aspectFit' />
+              <Image src={trophyIcon} className='section-icon' mode='aspectFit' />
               <Text className='section-title'>排行榜</Text>
             </View>
             <Text className='view-all-link' onClick={handleViewAllLeaderboard}>
@@ -131,18 +149,18 @@ export default function IndexPage() {
           <View className='my-rank-card'>
             <View className='my-rank-header'>
               <View className='my-rank-label'>
-                <Image src='../../assets/icons/trophy.png' className='rank-icon' mode='aspectFit' />
+                <Image src={trophyIcon} className='rank-icon' mode='aspectFit' />
                 <Text className='my-rank-text'>我的排名</Text>
               </View>
               <Text className='my-rank-value'>#{getMyRank()}</Text>
             </View>
             <View className='my-rank-stats'>
               <View className='stat-badge xp-badge'>
-                <Image src='../../assets/icons/star.png' className='badge-icon' mode='aspectFit' />
+                <Image src={starIcon} className='badge-icon' mode='aspectFit' />
                 <Text className='badge-text'>{userProgress?.xp.toLocaleString() || 0} XP</Text>
               </View>
               <View className='stat-badge streak-badge'>
-                <Image src='../../assets/icons/flame.png' className='badge-icon' mode='aspectFit' />
+                <Image src={flameIcon} className='badge-icon' mode='aspectFit' />
                 <Text className='badge-text'>连续{userProgress?.streak || 0}天</Text>
               </View>
             </View>
@@ -158,9 +176,9 @@ export default function IndexPage() {
                 >
                   <View className='rank-cell'>
                     {entry.rank === 1 ? (
-                      <Image src='../../assets/icons/crown.png' className='rank-icon' mode='aspectFit' />
+                      <Image src={crownIcon} className='rank-icon' mode='aspectFit' />
                     ) : entry.rank <= 3 ? (
-                      <Image src='../../assets/icons/medal.png' className='rank-icon' mode='aspectFit' />
+                      <Image src={medalIcon} className='rank-icon' mode='aspectFit' />
                     ) : (
                       <Text className='rank-number'>#{entry.rank}</Text>
                     )}
@@ -175,7 +193,7 @@ export default function IndexPage() {
                     </Text>
                   </View>
                   <View className='xp-cell'>
-                    <Image src='../../assets/icons/star.png' className='xp-icon' mode='aspectFit' />
+                    <Image src={starIcon} className='xp-icon' mode='aspectFit' />
                     <Text className='xp-text'>{entry.xp.toLocaleString()}</Text>
                   </View>
                 </View>
@@ -192,22 +210,22 @@ export default function IndexPage() {
 
         <View className='stats-grid'>
           <View className='stat-card'>
-            <Image src='../../assets/icons/file-x.png' className='stat-icon' mode='aspectFit' />
+            <Image src={fileXIcon} className='stat-icon' mode='aspectFit' />
             <Text className='stat-value'>{stats.totalQuestions}</Text>
             <Text className='stat-label'>总题目</Text>
           </View>
           <View className='stat-card'>
-            <Image src='../../assets/icons/check-circle.png' className='stat-icon' mode='aspectFit' />
+            <Image src={checkCircleIcon} className='stat-icon' mode='aspectFit' />
             <Text className='stat-value'>{stats.practiced}</Text>
             <Text className='stat-label'>已练习</Text>
           </View>
           <View className='stat-card'>
-            <Image src='../../assets/icons/x-circle.png' className='stat-icon' mode='aspectFit' />
+            <Image src={xCircleIcon} className='stat-icon' mode='aspectFit' />
             <Text className='stat-value'>{stats.mistakes}</Text>
             <Text className='stat-label'>错题</Text>
           </View>
           <View className='stat-card'>
-            <Image src='../../assets/icons/star.png' className='stat-icon' mode='aspectFit' />
+            <Image src={starIcon} className='stat-icon' mode='aspectFit' />
             <Text className='stat-value'>{stats.favorites}</Text>
             <Text className='stat-label'>收藏</Text>
           </View>
@@ -226,7 +244,7 @@ export default function IndexPage() {
         <View className='card daily-tasks-card'>
           <View className='section-header'>
             <View className='section-title-wrapper'>
-              <Image src='../../assets/icons/gift.png' className='section-icon' mode='aspectFit' />
+              <Image src={giftIcon} className='section-icon' mode='aspectFit' />
               <Text className='section-title'>今日任务</Text>
             </View>
             <Text className='task-count'>
@@ -242,9 +260,9 @@ export default function IndexPage() {
                 <View key={task.id} className='task-item'>
                   <View className={`task-icon-wrapper ${task.completed ? 'completed' : ''}`}>
                     {task.completed ? (
-                      <Image src='../../assets/icons/check-circle.png' className='task-icon' mode='aspectFit' />
+                      <Image src={checkCircleIcon} className='task-icon' mode='aspectFit' />
                     ) : (
-                      <Image src={`../../assets/icons/${def?.icon?.toLowerCase().replace('icon', '') || 'book'}.png`} className='task-icon' mode='aspectFit' />
+                      <Image src={iconMap[def?.icon || 'book'] || bookIcon} className='task-icon' mode='aspectFit' />
                     )}
                   </View>
                   <View className='task-content'>
@@ -272,7 +290,7 @@ export default function IndexPage() {
         <View className='chapter-section'>
           <View className='section-header'>
             <View className='section-title-wrapper'>
-              <Image src='../../assets/icons/book.png' className='section-icon' mode='aspectFit' />
+              <Image src={bookIcon} className='section-icon' mode='aspectFit' />
               <Text className='section-title'>章节练习</Text>
             </View>
           </View>
@@ -288,7 +306,7 @@ export default function IndexPage() {
                   <Text className='chapter-name'>{getChapterDisplayName(chapter)}</Text>
                   <Text className='chapter-hint'>点击开始练习</Text>
                 </View>
-                <Image src='../../assets/icons/book.png' className='chapter-arrow' mode='aspectFit' />
+                <Image src={bookIcon} className='chapter-arrow' mode='aspectFit' />
               </View>
             ))}
           </View>

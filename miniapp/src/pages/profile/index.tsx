@@ -6,6 +6,7 @@ import { DAILY_TASKS, ACHIEVEMENTS, DAILY_TASK_REWARD_XP, DAILY_TASK_REWARD_XP_Q
 import { useAuthStore } from '@/store/auth';
 import { useUserProgressStore } from '@/store/user-progress';
 import { logout } from '@/lib/auth';
+import DailyTaskModal from '@/components/modals/DailyTaskModal';
 import type { UserProgress, UserAchievement, UserDailyTask } from '@/lib/types';
 import './index.scss';
 
@@ -13,6 +14,7 @@ export default function ProfilePage() {
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [achievements, setAchievements] = useState<UserAchievement[]>([]);
   const [dailyTasks, setDailyTasks] = useState<UserDailyTask[]>([]);
+  const [claimedTask, setClaimedTask] = useState<{ taskName: string; xpReward: number } | null>(null);
   const { setLoggedOut } = useAuthStore();
   const { setProgress: setStoreProgress } = useUserProgressStore();
 
@@ -49,7 +51,8 @@ export default function ProfilePage() {
         return;
       }
       const rewardXp = taskType === 'answer_20_questions' ? DAILY_TASK_REWARD_XP_QUESTIONS : DAILY_TASK_REWARD_XP;
-      Taro.showToast({ title: `+${rewardXp} XP`, icon: 'success' });
+      const taskName = getTaskDef(taskType)?.name || taskType;
+      setClaimedTask({ taskName, xpReward: rewardXp });
       loadData();
     } catch (err) {
       Taro.showToast({ title: '领取失败', icon: 'error' });
@@ -173,6 +176,12 @@ export default function ProfilePage() {
           </View>
         </View>
       </View>
+      <DailyTaskModal
+        visible={!!claimedTask}
+        taskName={claimedTask?.taskName || ''}
+        xpReward={claimedTask?.xpReward || 0}
+        onClose={() => setClaimedTask(null)}
+      />
     </ScrollView>
   );
 }

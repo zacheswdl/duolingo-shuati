@@ -1,5 +1,6 @@
 import { defineConfig } from '@tarojs/cli';
 import devConfig from './dev';
+import path from 'path';
 
 export default defineConfig(async (merge) => {
   const baseConfig = {
@@ -21,6 +22,9 @@ export default defineConfig(async (merge) => {
     compiler: {
       type: 'webpack5',
       prebundle: { enable: false },
+    },
+    alias: {
+      '@': path.resolve(__dirname, '../src'),
     },
     sass: {
       data: '@import "@/styles/variables.scss";',

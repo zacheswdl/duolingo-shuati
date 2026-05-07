@@ -20,6 +20,7 @@
     "ios >= 8"
   ],
   "dependencies": {
+    "@supabase/supabase-js": "^2.105.1",
     "@tarojs/components": "4.2.0",
     "@tarojs/helper": "4.2.0",
     "@tarojs/plugin-framework-react": "4.2.0",
@@ -28,18 +29,22 @@
     "@tarojs/runtime": "4.2.0",
     "@tarojs/shared": "4.2.0",
     "@tarojs/taro": "4.2.0",
-    "@supabase/supabase-js": "^2.105.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.5",
+    "@babel/preset-react": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
     "@babel/runtime": "^7.24.0",
     "@tarojs/cli": "4.2.0",
     "@tarojs/webpack5-runner": "4.2.0",
     "@types/react": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
+    "babel-loader": "^10.1.1",
     "eslint": "^8.57.0",
     "eslint-config-taro": "4.2.0",
     "eslint-plugin-react": "^7.34.0",

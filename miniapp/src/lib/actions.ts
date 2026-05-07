@@ -48,9 +48,37 @@ export async function getUserProgress() {
   const { data, error } = await supabase.from('user_progress').select('*').eq('user_id', user.id).maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) {
-    const { data: newProgress, error: insertError } = await supabase.from('user_progress').insert({
-      user_id: user.id, hearts: HEARTS_MAX, xp: 0, streak: 0, total_correct: 0, chapter_correct: {}, last_hearts_reset: new Date().toISOString().split('T')[0],
-    }).select().single();
+    const today = new Date().toISOString().split('T')[0];
+
+    const insertPayload = {
+      user_id: user.id,
+      hearts: HEARTS_MAX,
+      xp: 0,
+      streak: 0,
+      total_correct: 0,
+      chapter_correct: {},
+      last_hearts_reset: today,
+    };
+
+    let newProgress: any = null;
+    let insertError: any = null;
+
+    ({ data: newProgress, error: insertError } = await supabase
+      .from('user_progress')
+      .insert(insertPayload)
+      .select()
+      .single());
+
+    // 兼容历史库：若缺少 last_hearts_reset 列，退化为不写入该字段
+    if (insertError?.message?.includes('last_hearts_reset')) {
+      const { last_hearts_reset: _ignored, ...fallbackPayload } = insertPayload;
+      ({ data: newProgress, error: insertError } = await supabase
+        .from('user_progress')
+        .insert(fallbackPayload)
+        .select()
+        .single());
+    }
+
     if (insertError) throw new Error(insertError.message);
     return newProgress;
   }
@@ -322,8 +350,30 @@ export async function updateDailyTaskProgress(taskType: string, progressIncremen
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Unauthorized');
   const today = new Date().toISOString().split('T')[0];
-  const { data: task } = await supabase.from('user_daily_tasks').select('*').eq('user_id', user.id).eq('task_date', today).eq('task_type', taskType).maybeSingle();
+
+  // 兜底：如果当日任务尚未初始化，先创建默认任务
+  let { data: task } = await supabase
+    .from('user_daily_tasks')
+    .select('*')
+    .eq('user_id', user.id)
+    .eq('task_date', today)
+    .eq('task_type', taskType)
+    .maybeSingle();
+
+  if (!task) {
+    await getDailyTasks();
+    const { data: fallbackTask } = await supabase
+      .from('user_daily_tasks')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('task_date', today)
+      .eq('task_type', taskType)
+      .maybeSingle();
+    task = fallbackTask;
+  }
+
   if (!task) return null;
+
   let newProgress;
   if (taskType === 'chapter_correct_50') {
     newProgress = await getTodayCorrectCount();

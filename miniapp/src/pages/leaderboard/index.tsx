@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import { getLeaderboard, getUserProgress } from '@/lib/actions';
 import { useAuthStore } from '@/store/auth';
 import type { LeaderboardEntry, UserProgress } from '@/lib/types';
@@ -15,17 +15,16 @@ export default function LeaderboardPage() {
   const loadData = useCallback(async () => {
     Taro.showLoading({ title: '加载中...' });
     try {
-      const [lbData, progressData] = await Promise.all([
-        getLeaderboard(50),
-        getUserProgress(),
-      ]);
+      // 先确保当前用户在 user_progress 有记录，再拉排行榜，避免“我的排名缺失”
+      const progressData = await getUserProgress();
+      const lbData = await getLeaderboard(50);
+
       setLeaderboard(lbData);
       setMyProgress(progressData);
 
-      const myEntry = lbData.find(entry => entry.user_id === userId);
-      if (myEntry) {
-        setMyRank(myEntry.rank);
-      }
+      const currentUserId = progressData?.user_id || userId;
+      const myEntry = lbData.find(entry => entry.user_id === currentUserId);
+      setMyRank(myEntry?.rank ?? null);
     } catch (err) {
       Taro.showToast({ title: '加载失败', icon: 'error' });
     } finally {
@@ -36,6 +35,10 @@ export default function LeaderboardPage() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  useDidShow(() => {
+    loadData();
+  });
 
   const topThree = leaderboard.slice(0, 3);
   const restList = leaderboard.slice(3);

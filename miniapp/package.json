@@ -9,10 +9,16 @@
     "css": "sass"
   },
   "scripts": {
+    "prebuild:weapp": "node ./scripts/check-build-env.cjs",
+    "predev:weapp": "node ./scripts/check-build-env.cjs",
     "build:weapp": "taro build --type weapp",
     "dev:weapp": "taro build --type weapp --watch",
+    "verify:dist": "node ./scripts/verify-dist.cjs",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=18 <23"
   },
   "browserslist": [
     "last 3 versions",

@@ -5,6 +5,7 @@ import {
   getQuestions,
   recordAnswer,
   removeHeart,
+  addHeart,
   addXp,
   toggleFavorite,
   checkAndUnlockAchievements,
@@ -155,7 +156,7 @@ export default function LessonPage() {
     }
   };
 
-  const checkAnswer = () => {
+  const checkAnswer = async () => {
     if (selectedOptions.length === 0) {
       Taro.showToast({ title: '请选择答案', icon: 'none' });
       return;
@@ -178,26 +179,41 @@ export default function LessonPage() {
     if (correct) {
       setCorrectCount(prev => prev + 1);
       setXpEarned(prev => prev + XP_PER_CORRECT);
-      addXp(XP_PER_CORRECT).then(result => {
-        if (result.success) updateXp(result.newXp);
-      });
-      recordAnswer(currentQuestion.id, true);
-      updateDailyTaskProgress('answer_20_questions', 1);
-      updateDailyTaskProgress('chapter_correct_50', 1);
-      checkAndUnlockAchievements();
+
+      const xpResult = await addXp(XP_PER_CORRECT);
+      if (xpResult.success) updateXp(xpResult.newXp);
+
+      const addHeartResult = await addHeart();
+      if ((addHeartResult as any).success) {
+        setHearts((prev) => {
+          const nextHearts = Math.min(prev + 1, HEARTS_MAX);
+          updateHearts(nextHearts);
+          return nextHearts;
+        });
+      }
+
+      await recordAnswer(currentQuestion.id, true);
+      await updateDailyTaskProgress('answer_20_questions', 1);
+      await updateDailyTaskProgress('chapter_correct_50', 1);
+      await checkAndUnlockAchievements();
+      Taro.eventCenter.trigger('progress:changed');
     } else {
-      recordAnswer(currentQuestion.id, false);
-      removeHeart().then(result => {
-        if ((result as any).error === 'hearts') {
-          setShowHeartsModal(true);
-        } else if (result.success) {
-          setHearts(prev => Math.max(prev - 1, 0));
-          updateHearts(Math.max(hearts - 1, 0));
-          if (hearts - 1 <= 0) {
+      await recordAnswer(currentQuestion.id, false);
+      Taro.eventCenter.trigger('progress:changed');
+
+      const result = await removeHeart();
+      if ((result as any).error === 'hearts') {
+        setShowHeartsModal(true);
+      } else if (result.success) {
+        setHearts((prev) => {
+          const nextHearts = Math.max(prev - 1, 0);
+          updateHearts(nextHearts);
+          if (nextHearts <= 0) {
             setShowHeartsModal(true);
           }
-        }
-      });
+          return nextHearts;
+        });
+      }
     }
   };
 
@@ -211,7 +227,9 @@ export default function LessonPage() {
   const handleNext = () => {
     if (currentIndex >= questions.length - 1) {
       if (mode === 'chapter' || mode === 'recovery' || mode === 'favorites') {
-        updateDailyTaskProgress('chapter_practice', 1);
+        updateDailyTaskProgress('chapter_practice', 1).finally(() => {
+          Taro.eventCenter.trigger('progress:changed');
+        });
         Taro.showToast({ title: '练习完成！', icon: 'success' });
         setTimeout(() => Taro.navigateBack(), 1500);
       }
@@ -254,6 +272,7 @@ export default function LessonPage() {
     try {
       const result = await toggleFavorite(currentQuestion.id);
       setIsFavorite(result.isFavorite);
+      Taro.eventCenter.trigger('progress:changed');
       Taro.showToast({ title: result.isFavorite ? '已收藏' : '取消收藏', icon: 'none' });
     } catch (err) {
       Taro.showToast({ title: '操作失败', icon: 'error' });
@@ -308,13 +327,13 @@ export default function LessonPage() {
           <View className='header-info'>
             {mode !== 'exam' && (
               <View className='hearts-display'>
-                <Text className='hearts-icon'>❤️</Text>
+                <Text className='hearts-icon'>♥</Text>
                 <Text className='hearts-count'>{hearts}</Text>
               </View>
             )}
             {mode === 'exam' && (
               <View className='timer-display'>
-                <Text className='timer-icon'>⏱️</Text>
+                <Text className='timer-icon'>计时</Text>
                 <Text className={`timer-text ${examTimeLeft < 300 ? 'warning' : ''}`}>
                   {formatTime(examTimeLeft)}
                 </Text>
@@ -323,7 +342,7 @@ export default function LessonPage() {
           </View>
           {mode !== 'exam' && (
             <Text className='favorite-btn' onClick={handleFavorite}>
-              {isFavorite ? '❤️' : '🤍'}
+              {isFavorite ? '♥' : '☆'}
             </Text>
           )}
         </View>
@@ -357,7 +376,7 @@ export default function LessonPage() {
 
         {mode !== 'exam' && isAnswered && (
           <View className={`feedback-section ${isCorrect ? 'correct' : 'wrong'}`}>
-            <Text className='feedback-title'>{isCorrect ? '🎉 回答正确！' : '😢 回答错误'}</Text>
+            <Text className='feedback-title'>{isCorrect ? '回答正确' : '回答错误'}</Text>
             {!isCorrect && (
               <Text className='feedback-explanation'>
                 正确答案：{currentQuestion.correct_answer}

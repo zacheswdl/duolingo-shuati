@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { View, Text, ScrollView, Image } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import { getUserStats, getChapters, getLeaderboard, getDailyTasks, getUserProgress } from '@/lib/actions';
 import { DAILY_TASKS } from '@/lib/constants';
 import type { LeaderboardEntry, UserDailyTask } from '@/lib/types';
@@ -48,20 +48,25 @@ export default function IndexPage() {
   const loadData = useCallback(async () => {
     Taro.showLoading({ title: '加载中...' });
     try {
-      const [statsData, chaptersData, leaderboardData, tasksData, progressData] = await Promise.all([
+      const progressData = await getUserProgress();
+      const [statsData, chaptersData, leaderboardData, tasksData] = await Promise.all([
         getUserStats(),
         getChapters(),
         getLeaderboard(50),
         getDailyTasks(),
-        getUserProgress(),
       ]);
+
       setStats(statsData);
       setChapters(chaptersData as string[]);
       setLeaderboard(leaderboardData);
       setDailyTasks(tasksData);
+
       if (progressData) {
         setUserProgress({ hearts: progressData.hearts, xp: progressData.xp, streak: progressData.streak });
         setCurrentUserId(progressData.user_id);
+      } else {
+        setUserProgress(null);
+        setCurrentUserId('');
       }
     } catch (err) {
       Taro.showToast({ title: '加载失败', icon: 'error' });
@@ -73,6 +78,10 @@ export default function IndexPage() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  useDidShow(() => {
+    loadData();
+  });
 
   const progressPercent = stats.totalQuestions > 0
     ? Math.min((stats.practiced / stats.totalQuestions) * 100, 100)
@@ -278,7 +287,7 @@ export default function IndexPage() {
                     <Text className='task-guide'>{taskGuide.requirement}</Text>
                     <Text className='task-guide'>{taskGuide.howTo}</Text>
                     {task.claimed && (
-                      <Text className='task-claimed'>已领取奖励 ✅</Text>
+                      <Text className='task-claimed'>已领取奖励</Text>
                     )}
                   </View>
                 </View>

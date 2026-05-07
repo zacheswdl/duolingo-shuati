@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import { getMistakes } from '@/lib/actions';
 import type { UserAction, Question } from '@/lib/types';
 import './index.scss';
@@ -23,6 +23,10 @@ export default function MistakesPage() {
   useEffect(() => {
     loadMistakes();
   }, [loadMistakes]);
+
+  useDidShow(() => {
+    loadMistakes();
+  });
 
   const handleStartRecovery = () => {
     if (mistakes.length === 0) {
@@ -59,7 +63,7 @@ export default function MistakesPage() {
 
         {mistakes.length === 0 ? (
           <View className='empty-state'>
-            <Text className='empty-icon'>🎉</Text>
+            <Text className='empty-icon'>—</Text>
             <Text className='empty-text'>太棒了，没有错题！</Text>
           </View>
         ) : (

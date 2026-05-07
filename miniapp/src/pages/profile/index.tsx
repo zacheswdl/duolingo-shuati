@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import { getUserProgress, getUserAchievements, getDailyTasks, claimDailyTaskReward } from '@/lib/actions';
 import { DAILY_TASKS, ACHIEVEMENTS, DAILY_TASK_REWARD_XP, DAILY_TASK_REWARD_XP_QUESTIONS } from '@/lib/constants';
 import { useAuthStore } from '@/store/auth';
@@ -41,6 +41,10 @@ export default function ProfilePage() {
     loadData();
   }, [loadData]);
 
+  useDidShow(() => {
+    loadData();
+  });
+
   const unlockedKeys = new Set(achievements.map(a => a.achievement_key));
 
   const handleClaimTask = async (taskId: number, taskType: string) => {
@@ -79,24 +83,24 @@ export default function ProfilePage() {
     <ScrollView scrollY className='profile-page'>
       <View className='container'>
         <View className='user-card'>
-          <View className='avatar'>🦉</View>
+          <View className='avatar'>学</View>
           <View className='user-info'>
             <Text className='nickname'>学习者</Text>
             <View className='user-stats'>
               <View className='user-stat'>
-                <Text className='stat-icon'>⚡</Text>
+                <Text className='stat-icon'>XP</Text>
                 <Text className='stat-val'>{progress?.xp || 0} XP</Text>
               </View>
               <View className='user-stat'>
-                <Text className='stat-icon'>🔥</Text>
+                <Text className='stat-icon'>连</Text>
                 <Text className='stat-val'>{progress?.streak || 0} 天</Text>
               </View>
               <View className='user-stat'>
-                <Text className='stat-icon'>❤️</Text>
+                <Text className='stat-icon'>心</Text>
                 <Text className='stat-val'>{progress?.hearts || 0}</Text>
               </View>
               <View className='user-stat'>
-                <Text className='stat-icon'>✅</Text>
+                <Text className='stat-icon'>对</Text>
                 <Text className='stat-val'>{progress?.total_correct || 0}</Text>
               </View>
             </View>
@@ -140,7 +144,7 @@ export default function ProfilePage() {
               const unlocked = unlockedKeys.has(ach.key);
               return (
                 <View key={ach.key} className={`achievement-item ${unlocked ? 'unlocked' : ''}`}>
-                  <Text className='achievement-icon'>{unlocked ? '🏆' : '🔒'}</Text>
+                  <Text className='achievement-icon'>{unlocked ? '已解锁' : '未解锁'}</Text>
                   <Text className='achievement-name'>{ach.name}</Text>
                 </View>
               );

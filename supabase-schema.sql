@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS user_progress (
   total_correct INTEGER NOT NULL DEFAULT 0,
   chapter_correct JSONB NOT NULL DEFAULT '{}',
   last_active DATE,
+  last_hearts_reset DATE NOT NULL DEFAULT CURRENT_DATE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(user_id)
 );

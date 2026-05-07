@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import { getFavorites, removeFavorite } from '@/lib/actions';
 import type { Question } from '@/lib/types';
 import './index.scss';
@@ -23,6 +23,10 @@ export default function FavoritesPage() {
   useEffect(() => {
     loadFavorites();
   }, [loadFavorites]);
+
+  useDidShow(() => {
+    loadFavorites();
+  });
 
   const handleRemove = async (questionId: number) => {
     const res = await Taro.showModal({
@@ -75,7 +79,7 @@ export default function FavoritesPage() {
 
         {favorites.length === 0 ? (
           <View className='empty-state'>
-            <Text className='empty-icon'>⭐</Text>
+            <Text className='empty-icon'>—</Text>
             <Text className='empty-text'>暂无收藏题目</Text>
           </View>
         ) : (

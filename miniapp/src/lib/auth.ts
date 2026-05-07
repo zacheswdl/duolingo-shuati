@@ -25,7 +25,14 @@ export async function wxLogin(): Promise<{ success: boolean; error?: string; use
     });
 
     if (res.statusCode !== 200 || !res.data?.access_token) {
-      return { success: false, error: res.data?.error || '登录失败' };
+      const errorMessage = res.data?.stage
+        ? `${res.data.stage}: ${res.data?.error || '登录失败'}`
+        : res.data?.error || '登录失败';
+      console.error('[wxLogin] wechat-auth failed', {
+        statusCode: res.statusCode,
+        data: res.data,
+      });
+      return { success: false, error: errorMessage };
     }
 
     const { access_token, refresh_token } = res.data;

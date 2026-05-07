@@ -1,5 +1,5 @@
 import Taro from '@tarojs/taro';
-import { getAuthUrl } from './config';
+import { getAuthUrl, getSupabaseAnonKey } from './config';
 import { getSupabaseClient } from './supabase';
 
 const TOKEN_KEY = 'sb-access-token';
@@ -12,9 +12,15 @@ export async function wxLogin(): Promise<{ success: boolean; error?: string; use
       return { success: false, error: '微信登录失败' };
     }
 
+    const anonKey = getSupabaseAnonKey();
     const res = await Taro.request({
       url: getAuthUrl(),
       method: 'POST',
+      header: {
+        apikey: anonKey,
+        Authorization: `Bearer ${anonKey}`,
+        'Content-Type': 'application/json',
+      },
       data: { code },
     });
 
